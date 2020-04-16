@@ -6,10 +6,17 @@
 # Jenkins Part
 
 sudo apt-get install -y python
+sudo apt-get install -y python-bashate # dependencies for icn job
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python2 get-pip.py
 git clone "https://gerrit.akraino.org/r/icn"
-cd icn/ci
+
+# prep k8s
+cd icn
+sudo su # important
+make kud_bm_deploy_mini
+
+cd ci
 sed -i "s/2.192/\"2.230\"/" vars.yaml
 sudo ./install_ansible.sh
 sudo ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
@@ -69,22 +76,83 @@ ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
 git clone "https://gerrit.akraino.org/r/validation"
 cd validation
 
-sed -i "s/\/opt\/akraino/\/home\/stack/" bluval/volumes.yaml
-sed -i "s/\/root\//\/home\/stack\//" bluval/volumes.yaml
+sudo cp -R /root/.kube /home/stack/
+sudo chown -R stack:stack /root/.kube /home/stack/
+
+cat << EOF | tee bluval/volumes.yaml
+volumes:
+    ssh_key_dir:
+        local: '/home/stack/.ssh'
+        target: '/root/.ssh'
+    kube_config_dir:
+        local: '/home/stack/.kube'
+        target: '/root/.kube'
+    custom_variables_file:
+        local: '/home/stack/validation/tests/variables.yaml'
+        target: '/opt/akraino/validation/tests/variables.yaml'
+    blueprint_dir:
+        local: '/home/stack/validation/bluval'
+        target: '/opt/akraino/validation/bluval'
+    results_dir:
+        local: '/home/stack/results'
+        target: '/opt/akraino/results'
+    openrc:
+        local: '/home/stack/openrc'
+        target: '/root/openrc'
+layers:
+    common:
+        - custom_variables_file
+        - blueprint_dir
+        - results_dir
+    hardware:
+        - ssh_key_dir
+    os:
+        - ssh_key_dir
+    networking:
+        - ssh_key_dir
+    docker:
+        - ssh_key_dir
+    k8s:
+        - ssh_key_dir
+        - kube_config_dir
+    k8s_networking:
+        - ssh_key_dir
+        - kube_config_dir
+    openstack:
+        - openrc
+    sds:
+    sdn:
+    vim:
+EOF
 
 sed -i "s/172.28.17.206/localhost/" tests/variables.yaml
 sed -i "s/cloudadmin/stack/" tests/variables.yaml
 sed -i "s/\/root\//\/home\/stack\//" tests/variables.yaml
 
-cat << EOF | tee bluval/bluval-rec.yaml
+cat << EOF | tee bluval/bluval-icn.yaml
 blueprint:
     name: rec
     layers:
+        - os
         - k8s
+    os: &os
+        -
+            name: lynis
+            what: lynis
+            optional: "False"
+        -
+            name: vuls
+            what: vuls
+            optional: "False"
+
     k8s: &k8s
         -
             name: kube-hunter
             what: kube-hunter
+        -
+            name: conformance
+            what: conformance
+            optional: "False"
 EOF
 
-sudo bluval/blucon.sh -l k8s rec
+sudo bluval/blucon.sh -l k8s icn
