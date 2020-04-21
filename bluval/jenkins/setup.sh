@@ -156,3 +156,15 @@ blueprint:
 EOF
 
 sudo bluval/blucon.sh -l k8s icn
+
+
+# bluval-daily-master
+# highly wip
+
+ssh-keygen -t rsa -N "" -f /home/stack/jenkins-rsa
+chmod 644 /home/stack/jenkins-rsa
+
+sudo usermod -aG docker jenkins
+sudo usermod -aG jenkins stack # sometimes useful to cd into stuff
+
+sudo su -c "pip3 install lftools" # need to install as root
