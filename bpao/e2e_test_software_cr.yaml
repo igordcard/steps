@@ -1,0 +1,10 @@
+apiVersion: bpa.akraino.org/v1alpha1
+kind: Software
+metadata:
+  labels:
+    cluster: cluster-test
+    owner: c1
+  name: example-software
+spec:
+  masterSoftware:
+    - silversearcher-ag
