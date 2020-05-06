@@ -168,3 +168,11 @@ sudo usermod -aG docker jenkins
 sudo usermod -aG jenkins stack # sometimes useful to cd into stuff
 
 sudo su -c "pip3 install lftools" # need to install as root
+
+#
+# run conformance manually:
+# kubectl apply -f /opt/akraino/validation/tests/k8s/conformance/sonobuoy.yaml 2>&
+# kubectl get pod sonobuoy --namespace sonobuoy
+# kubectl get pod sonobuoy --namespace sonobuoy 2>&1
+# kubectl delete -f /opt/akraino/validation/tests/k8s/conformance${/}sonobuoy.yaml
+# kubectl delete -f /opt/akraino/validation/tests/k8s/conformance/sonobuoy.yaml 2>&1
