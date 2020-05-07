@@ -76,6 +76,9 @@ ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
 git clone "https://gerrit.akraino.org/r/validation"
 cd validation
 
+# allow OS tests to run in the same machine as bluval:
+sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
+
 sudo cp -R /root/.kube /home/stack/
 sudo chown -R stack:stack /root/.kube /home/stack/
 
