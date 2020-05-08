@@ -2,19 +2,18 @@
 
 # requirements:
 # - host that doesn't need proxy configs anymore
+# - use root user
 
 # Jenkins and Kubernetes Part
 
-sudo apt-get install -y python build-essential python-bashate git-review # dependencies for icn job
+apt-get install -y python build-essential python-bashate git-review # dependencies for icn job
 wget https://bootstrap.pypa.io/get-pip.py
-#sudo python2 get-pip.py
 python2 get-pip.py
 git clone "https://gerrit.akraino.org/r/icn"
 
 # prep k8s
 # only do this 1 machine -> the master
 #cd icn
-#sudo su # important
 #make kud_bm_deploy_mini
 # 1.16 instead:
 git clone "https://gerrit.onap.org/r/multicloud/k8s"
@@ -54,8 +53,8 @@ vim aio.sh
 
 cd ci
 sed -i "s/2.192/\"2.230\"/" vars.yaml
-sudo ./install_ansible.sh
-sudo ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
+./install_ansible.sh
+ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
 echo "machine nexus.akraino.org login icn.jenkins password icngroup" | sudo tee /var/lib/jenkins/.netrc
 
@@ -87,21 +86,21 @@ python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-master-verify
 
 # Bluval Part
 
-sudo apt-get update
-sudo apt-get install -y \
+apt-get update
+apt-get install -y \
     apt-transport-https \
     ca-certificates \
     curl \
     gnupg-agent \
     software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo apt-key fingerprint 0EBFCD88
-sudo add-apt-repository \
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
-sudo apt-get update
-sudo apt-get install -y \
+apt-get update
+apt-get install -y \
     docker-ce \
     docker-ce-cli\
     containerd.io
@@ -112,31 +111,25 @@ ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
 git clone "https://gerrit.akraino.org/r/validation"
 cd validation
 
-# allow OS tests to run in the same machine as bluval:
-sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
-
-sudo cp -R /root/.kube /home/stack/
-sudo chown -R stack:stack /root/.kube /home/stack/
-
 cat << EOF | tee bluval/volumes.yaml
 volumes:
     ssh_key_dir:
-        local: '/home/stack/.ssh'
+        local: '/root/.ssh'
         target: '/root/.ssh'
     kube_config_dir:
-        local: '/home/stack/.kube'
+        local: '/root/.kube'
         target: '/root/.kube'
     custom_variables_file:
-        local: '/home/stack/validation/tests/variables.yaml'
+        local: '/root/validation/tests/variables.yaml'
         target: '/opt/akraino/validation/tests/variables.yaml'
     blueprint_dir:
-        local: '/home/stack/validation/bluval'
+        local: '/root/validation/bluval'
         target: '/opt/akraino/validation/bluval'
     results_dir:
-        local: '/home/stack/results'
+        local: '/root/results'
         target: '/opt/akraino/results'
     openrc:
-        local: '/home/stack/openrc'
+        local: '/root/openrc'
         target: '/root/openrc'
 layers:
     common:
@@ -165,9 +158,11 @@ layers:
 EOF
 
 sed -i "s/172.28.17.206/localhost/" tests/variables.yaml
-sed -i "s/cloudadmin/stack/" tests/variables.yaml
-sed -i "s/\/root\//\/home\/stack\//" tests/variables.yaml
+sed -i "s/cloudadmin/root/" tests/variables.yaml
 
+# or:
+# git fetch "https://gerrit.akraino.org/r/validation" refs/changes/70/3370/1 && git checkout FETCH_HEAD
+# git checkout -b 3370
 cat << EOF | tee bluval/bluval-icn.yaml
 blueprint:
     name: rec
@@ -194,19 +189,23 @@ blueprint:
             optional: "False"
 EOF
 
-sudo bluval/blucon.sh -l k8s icn
+# allow OS tests to run in the same machine as bluval:
+sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
+
+python3 bluval/blucon.py -l os icn
+#bluval/blucon.sh -l k8s icn
 
 
 # bluval-daily-master
 # highly wip
 
-ssh-keygen -t rsa -N "" -f /home/stack/jenkins-rsa
-chmod 644 /home/stack/jenkins-rsa
+ssh-keygen -t rsa -N "" -f /root/jenkins-rsa
+chmod 644 /root/jenkins-rsa
 
-sudo usermod -aG docker jenkins
-sudo usermod -aG jenkins stack # sometimes useful to cd into stuff
+usermod -aG docker jenkins
+usermod -aG jenkins root # sometimes useful to cd into stuff
 
-sudo su -c "pip3 install lftools" # need to install as root
+pip3 install lftools # need to install as root
 
 #
 # run conformance manually:
