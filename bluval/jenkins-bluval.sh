@@ -3,18 +3,38 @@
 # requirements:
 # - host that doesn't need proxy configs anymore
 
-# Jenkins Part
+# Jenkins and Kubernetes Part
 
-sudo apt-get install -y python
-sudo apt-get install -y python-bashate # dependencies for icn job
+sudo apt-get install -y python build-essential python-bashate git-review # dependencies for icn job
 wget https://bootstrap.pypa.io/get-pip.py
-sudo python2 get-pip.py
+#sudo python2 get-pip.py
+python2 get-pip.py
 git clone "https://gerrit.akraino.org/r/icn"
 
 # prep k8s
-cd icn
-sudo su # important
-make kud_bm_deploy_mini
+#cd icn
+#sudo su # important
+#make kud_bm_deploy_mini
+# 1.16 instead:
+git clone "https://gerrit.onap.org/r/multicloud/k8s"
+cd k8s
+ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
+git remote add gerrit ssh://igordcard@gerrit.onap.org:29418/multicloud/k8s.git
+git review -s
+git review -d 106869
+# 1. set dns_min_replicas: 1
+vim kud/hosting_providers/vagrant/inventory/group_vars/k8s-cluster.yml
+cd kud/hosting_providers/baremetal/
+# 2. remove cmk, ovn and virtlet groups
+vim aio.sh
+# 3. replace all localhost with $HOSTNAME: :%s/localhost/$HOSTNAME
+sed -i 's/localhost/$HOSTNAME/' aio.sh
+./aio.sh # this installs kubernetes
+# temporary fix for kubeadm download error that will happen
+#mv /tmp/releases/kubeadm /tmp/releases/kubeadm-v1.16.9-amd64
+# run again
+#./aio.sh
+
 
 cd ci
 sed -i "s/2.192/\"2.230\"/" vars.yaml
