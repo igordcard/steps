@@ -29,7 +29,15 @@ cd kud/hosting_providers/baremetal/
 vim aio.sh
 # 3. replace all localhost with $HOSTNAME: :%s/localhost/$HOSTNAME
 sed -i 's/localhost/$HOSTNAME/' aio.sh
+vim ../vagrant/installer.sh
+# 4. in installer.sh, comment the following:
+# install_addons
+# if ${KUD_PLUGIN_ENABLED:-false}; then
+#     install_plugin
+# fi
 ./aio.sh # this installs kubernetes
+
+
 # temporary fix for kubeadm download error that will happen
 #mv /tmp/releases/kubeadm /tmp/releases/kubeadm-v1.16.9-amd64
 # run again
