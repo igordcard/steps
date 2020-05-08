@@ -40,7 +40,8 @@ vim aio.sh
 # pod11-node2 ansible_ssh_host=10.10.110.22 ansible_ssh_port=22
 # pod11-node2
 # 6. before proceeding, make sure root logins are allowed between
-# the nodes and that the public keys have been exchanged, then
+# the nodes and that the public keys have been exchanged,
+# and also SSH to localhost, then
 # install kubernetes (ansible will automatically install it in the worker node)
 ./aio.sh
 
@@ -159,6 +160,8 @@ EOF
 
 sed -i "s/172.28.17.206/localhost/" tests/variables.yaml
 sed -i "s/cloudadmin/root/" tests/variables.yaml
+sed -i "s/cloudpassword/s/" tests/variables.yaml
+sed -i "s/: ssh_keyfile/: \/root\/.ssh\/id_rsa/" tests/variables.yaml
 
 # or:
 # git fetch "https://gerrit.akraino.org/r/validation" refs/changes/70/3370/1 && git checkout FETCH_HEAD
@@ -192,8 +195,8 @@ EOF
 # allow OS tests to run in the same machine as bluval:
 sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
 
-python3 bluval/blucon.py -l os icn
-#bluval/blucon.sh -l k8s icn
+bluval/blucon.sh -l os icn # first time
+#python3 bluval/blucon.py -l os icn # sufficient in subsequent times
 
 
 # bluval-daily-master
