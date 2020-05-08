@@ -45,13 +45,6 @@ vim aio.sh
 # install kubernetes (ansible will automatically install it in the worker node)
 ./aio.sh
 
-
-# temporary fix for kubeadm download error that will happen
-#mv /tmp/releases/kubeadm /tmp/releases/kubeadm-v1.16.9-amd64
-# run again
-#./aio.sh
-
-
 cd ci
 sed -i "s/2.192/\"2.230\"/" vars.yaml
 ./install_ansible.sh
@@ -195,8 +188,8 @@ EOF
 # allow OS tests to run in the same machine as bluval:
 sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
 
-bluval/blucon.sh -l os icn # first time
-#python3 bluval/blucon.py -l os icn # sufficient in subsequent times
+bluval/blucon.sh -l os icn
+#python3 bluval/blucon.py -l os icn
 
 
 # bluval-daily-master
