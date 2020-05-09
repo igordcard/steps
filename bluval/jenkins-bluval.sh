@@ -81,28 +81,32 @@ pip install jenkins-job-builder
 # or just $ jenkins-jobs test/update, if you logout and login again before
 python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-master-verify
 python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-master-verify
+python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb bluval-daily-master
+python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb bluval-daily-master
 
 
 # Bluval Part
 
-apt-get update
-apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg-agent \
-    software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-apt-key fingerprint 0EBFCD88
-add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
-apt-get update
-apt-get install -y \
-    docker-ce \
-    docker-ce-cli\
-    containerd.io
+# kud installation will take care of the following:
+#
+# apt-get update
+# apt-get install -y \
+#     apt-transport-https \
+#     ca-certificates \
+#     curl \
+#     gnupg-agent \
+#     software-properties-common
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+# apt-key fingerprint 0EBFCD88
+# add-apt-repository \
+#    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+#    $(lsb_release -cs) \
+#    stable"
+# apt-get update
+# apt-get install -y \
+#     docker-ce \
+#     docker-ce-cli\
+#     containerd.io
 
 cd
 mkdir results
