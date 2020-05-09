@@ -4,18 +4,14 @@
 # - host that doesn't need proxy configs anymore
 # - use root user
 
-# Jenkins and Kubernetes Part
-
-apt-get install -y python build-essential python-bashate git-review # dependencies for icn job
-wget https://bootstrap.pypa.io/get-pip.py
-python2 get-pip.py
-git clone "https://gerrit.akraino.org/r/icn"
+# Kubernetes part
 
 # prep k8s
 # only do this 1 machine -> the master
 #cd icn
 #make kud_bm_deploy_mini
 # 1.16 instead:
+apt-get install -y git-review
 git clone "https://gerrit.onap.org/r/multicloud/k8s"
 cd k8s
 ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
@@ -45,9 +41,18 @@ vim aio.sh
 # install kubernetes (ansible will automatically install it in the worker node)
 ./aio.sh
 
+# Jenkins part
+
+apt-get install -y python build-essential python-bashate # dependencies for icn job
+wget https://bootstrap.pypa.io/get-pip.py
+python2 get-pip.py
+git clone "https://gerrit.akraino.org/r/icn"
+
+
 cd ci
-sed -i "s/2.192/\"2.230\"/" vars.yaml
+sed -i "s/2.192/\"2.235\"/" vars.yaml
 ./install_ansible.sh
+pip install -U ansible # otherwise will fail on jenkins plugins download
 ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
 echo "machine nexus.akraino.org login icn.jenkins password icngroup" | sudo tee /var/lib/jenkins/.netrc
@@ -161,7 +166,7 @@ sed -i "s/: ssh_keyfile/: \/root\/.ssh\/id_rsa/" tests/variables.yaml
 # git checkout -b 3370
 cat << EOF | tee bluval/bluval-icn.yaml
 blueprint:
-    name: rec
+    name: icn
     layers:
         - os
         - k8s
