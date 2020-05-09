@@ -57,6 +57,10 @@ ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
 echo "machine nexus.akraino.org login icn.jenkins password icngroup" | sudo tee /var/lib/jenkins/.netrc
 
+# apt-get install libxml2-dev libxslt-dev
+# pip3 install xmlstarlet
+apt-get install xmlstarlet
+
 cd
 git clone --recursive "https://gerrit.akraino.org/r/ci-management"
 #git clone "https://gerrit.akraino.org/r/icn"
@@ -76,14 +80,29 @@ password=admin
 url=http://localhost:8080
 EOF
 
+# add the jenkins-ssh key to Jenkins via the web UI: http://10.10.110.23:8080/credentials/store/system/domain/_/newCredentials
+# SSH Username with private key
+# ID: jenkins-ssh
+# Username: icn.jenkins
+# Private key: <copy from /root/.ssh/id_rsa>
+# and then add respective public key to gerrit.akraino.org
+
+# and put the private key where it can be accessed by jenkins [ideally a fresh one should be created at this point]
+# this is the CLUSTER_SSH_KEY -> CLUSTER_SSH_KEY=/var/lib/jenkins/jenkins-rsa
+cp /root/.ssh/id_rsa /var/lib/jenkins/jenkins-rsa
+chown jenkins:jenkins /var/lib/jenkins/jenkins-rsa
+
 pip install jenkins-job-builder
 
 # or just $ jenkins-jobs test/update, if you logout and login again before
 python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-master-verify
 python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-master-verify
-python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb bluval-daily-master
-python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb bluval-daily-master
+jenkins-jobs test -x ci-management/jjb/validation ci-management/jjb:icn/ci/jjb bluval-daily-master
+jenkins-jobs update -x ci-management/jjb/validation ci-management/jjb:icn/ci/jjb bluval-daily-master
 
+# install the Rebuilder plugin to easily rebuild a job with the same/similar parameters:
+# Go to: http://10.10.110.23:8080/pluginManager/available and install "Rebuilder"
+systemctl restart jenkins
 
 # Bluval Part
 
@@ -204,11 +223,10 @@ bluval/blucon.sh -l os icn
 # bluval-daily-master
 # highly wip
 
-ssh-keygen -t rsa -N "" -f /root/jenkins-rsa
-chmod 644 /root/jenkins-rsa
+# ssh-keygen -t rsa -N "" -f /root/jenkins-rsa
+# chmod 644 /root/jenkins-rsa
 
 usermod -aG docker jenkins
-usermod -aG jenkins root # sometimes useful to cd into stuff
 
 pip3 install lftools # need to install as root
 

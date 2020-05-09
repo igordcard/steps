@@ -1,0 +1,20 @@
+- project:
+    name: bluval
+    project-name: validation
+    project: validation
+    build-node: '{build-node}'
+    group-id: org.akraino.validation
+    refspec: refs/heads/master
+    branch: master
+    view:
+      - project-view
+    blueprint:
+      - iec
+      - rec
+    stream:
+      - master:
+          branch: '{stream}'
+          gs-pathname: ''
+          disabled: false
+    jobs:
+      - bluval-run-daily-tests

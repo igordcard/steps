@@ -1,0 +1,21 @@
+- project:
+    name: icn-bluval
+    project-name: validation
+    project: validation
+    group-id: org.akraino.validation
+    refspec: refs/heads/master
+    branch: master
+    view:
+      - project-view
+    blueprint:
+      - icn
+    stream:
+      - master:
+          branch: '{stream}'
+          gs-pathname: ''
+          disabled: false
+    validation_lab:
+      - yoursilo
+    build-node: master
+    jobs:
+      - bluval-run-daily-tests
