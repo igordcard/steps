@@ -97,8 +97,8 @@ pip install jenkins-job-builder
 # or just $ jenkins-jobs test/update, if you logout and login again before
 python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-master-verify
 python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-master-verify
-jenkins-jobs test -x ci-management/jjb/validation ci-management/jjb:icn/ci/jjb bluval-daily-master
-jenkins-jobs update -x ci-management/jjb/validation ci-management/jjb:icn/ci/jjb bluval-daily-master
+python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb bluval-daily-master
+python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb bluval-daily-master
 
 # install the Rebuilder plugin to easily rebuild a job with the same/similar parameters:
 # Go to: http://10.10.110.23:8080/pluginManager/available and install "Rebuilder"
