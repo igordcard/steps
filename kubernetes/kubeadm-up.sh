@@ -53,7 +53,7 @@ sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 
-sudo usermod -a -G docker USER
+sudo usermod -a -G docker $USER
 
 # k8s setup
 
