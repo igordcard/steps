@@ -74,5 +74,5 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown -R $(id -u):$(id -g) $HOME/.kube/config
 
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')" # kubespray kud uses Flannel
 kubectl taint node $HOSTNAME node-role.kubernetes.io/master:NoSchedule-
