@@ -5,7 +5,9 @@
 # make sure to delete weave before k8s or docker changes
 # the following command may not be in the correct format right now:
 kubectl delete -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-weave reset
+curl -L git.io/weave -o weave
+chmod a+x weave
+./weave reset
 
 rm -rf ~/.kube
 sudo su
