@@ -7,6 +7,10 @@
 # - host that doesn't need proxy configs anymore
 # - use root user
 
+apt-get update
+apt-get upgrade -y
+apt-get dist-upgrade -y
+# reboot if kernel got updated
 apt-get install -y python build-essential python-bashate # dependencies for icn job
 wget https://bootstrap.pypa.io/get-pip.py
 python2 get-pip.py
@@ -19,7 +23,7 @@ sed -i "s/2.192/\"2.237\"/" vars.yaml
 pip install -U ansible # otherwise will fail on jenkins plugins download
 ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
-echo "machine nexus.akraino.org login icn.jenkins password icngroup" | sudo tee /var/lib/jenkins/.netrc
+echo "machine nexus.akraino.org login icn.jenkins password icngroup" | tee /var/lib/jenkins/.netrc
 
 cd
 git clone --recursive "https://gerrit.akraino.org/r/ci-management"
@@ -39,6 +43,10 @@ user=admin
 password=admin
 url=http://localhost:8080
 EOF
+
+# Regarding bug from https://issues.jenkins-ci.org/browse/JENKINS-28466:
+# Go to the Jenkins web UI http://10.10.110.23:8080:
+# - 'Manage Jenkins' > 'Configure System' > 'click save without any changes'.
 
 # assume pharos pod11-node3
 # add the jenkins-ssh key to Jenkins via the web UI: http://10.10.110.23:8080/credentials/store/system/domain/_/newCredentials
