@@ -12,13 +12,13 @@ python2 get-pip.py
 git clone "https://gerrit.akraino.org/r/icn"
 
 
-cd ci
-sed -i "s/2.192/\"2.235\"/" vars.yaml
+cd icn/ci
+sed -i "s/2.192/\"2.238\"/" vars.yaml
 ./install_ansible.sh
 pip install -U ansible # otherwise will fail on jenkins plugins download
 ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
-echo "machine nexus.akraino.org login icn.jenkins password icngroup" | sudo tee /var/lib/jenkins/.netrc
+echo "machine nexus.akraino.org login icn.jenkins password icngroup" | tee /var/lib/jenkins/.netrc
 
 cd
 git clone --recursive "https://gerrit.akraino.org/r/ci-management"
@@ -39,29 +39,44 @@ password=admin
 url=http://localhost:8080
 EOF
 
-# add the jenkins-ssh key to Jenkins via the web UI: http://10.10.110.23:8080/credentials/store/system/domain/_/newCredentials
+# add the jenkins-ssh key to Jenkins via the web UI: http://10.10.140.24:8080/credentials/store/system/domain/_/newCredentials
 # SSH Username with private key
 # ID: jenkins-ssh
 # Username: icn.jenkins
-# Private key: <copy from /root/.ssh/id_rsa>
-# and then add respective public key to gerrit.akraino.org
+# Private key: use the one Cheng sent over email.
 
-# and put the private key where it can be accessed by jenkins [ideally a fresh one should be created at this point]
+# and this is the key for SSHing to the cluster by jenkins/bluval:
+# put the private key where it can be accessed by jenkins [ideally a fresh one should be created at this point]
 # this is the CLUSTER_SSH_KEY -> CLUSTER_SSH_KEY=/var/lib/jenkins/jenkins-rsa
+ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
+# >> and also copy public key to onap and akraino gerrits! for the time being, until validation merges the patch and I don't have to checkout
 cp /root/.ssh/id_rsa /var/lib/jenkins/jenkins-rsa
 chown jenkins:jenkins /var/lib/jenkins/jenkins-rsa
+
+# and here's the temporary part about having the right validation patch:
+cd ~/ci-management
+sed -i 's/ssh:\/\/akraino-jobbuilder@gerrit.akraino.org:29418/https:\/\/github.com\/igordcard/' jjb/defaults.yaml
 
 pip install jenkins-job-builder
 
 # or just $ jenkins-jobs test/update, if you logout and login again before
 python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-master-verify
 python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-master-verify
-python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb bluval-daily-master
-python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb bluval-daily-master
+python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-bluval-daily-master
+python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-bluval-daily-master
 
 # install the Rebuilder plugin to easily rebuild a job with the same/similar parameters:
-# Go to: http://10.10.110.23:8080/pluginManager/available and install "Rebuilder"
+# Go to: http://10.10.140.24:8080/pluginManager/available and install "Rebuilder"
+
+# and let jenkins call docker
+usermod -aG docker jenkins
+
 systemctl restart jenkins
+
+# >> check kubespray-up.sh
+
+pip3 install lftools # need to install as root
+
 
 # Bluval Part
 
@@ -88,7 +103,6 @@ systemctl restart jenkins
 
 cd
 mkdir results
-ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa
 git clone "https://gerrit.akraino.org/r/validation"
 cd validation
 
@@ -184,10 +198,6 @@ bluval/blucon.sh -l os icn
 
 # ssh-keygen -t rsa -N "" -f /root/jenkins-rsa
 # chmod 644 /root/jenkins-rsa
-
-usermod -aG docker jenkins
-
-pip3 install lftools # need to install as root
 
 #
 # run conformance manually:

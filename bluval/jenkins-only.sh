@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # warning: forked off jenkins-bluval.sh on
-# 20200521 but likely won't be updated again
+# 20200521 but likely won't be updated much
 
 # requirements:
 # - host that doesn't need proxy configs anymore
