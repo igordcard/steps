@@ -106,6 +106,10 @@ mkdir results
 git clone "https://gerrit.akraino.org/r/validation"
 cd validation
 
+# allow OS tests to run in the same machine as bluval:
+sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
+# currently this is being provided by my fork on github
+
 cat << EOF | tee bluval/volumes.yaml
 volumes:
     ssh_key_dir:
@@ -185,9 +189,6 @@ blueprint:
             what: conformance
             optional: "False"
 EOF
-
-# allow OS tests to run in the same machine as bluval:
-sed -i "s/docker run --rm/docker run --rm --net=host/" bluval/blucon.py
 
 bluval/blucon.sh -l os icn
 #python3 bluval/blucon.py -l os icn
