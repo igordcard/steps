@@ -1,0 +1,172 @@
+The following instructions assume the user executes all commands as root, to facilitate development and reduce the length of these instructions.
+For a production deployment, adaptations should be made to reduce the need for privilege escalation, as well as evaluate security as top-priority.
+
+Requirements:
+- Access to the Internet (proxy considerations are ignored in this documentation)
+- Ubuntu 18.04 as the operating system (only one tested)
+- SSH is configured in all machines part of the cluster
+- Login as root
+
+Furthermore, this guide assumes that:
+- There are a total of two machines.
+- The first machine includes Jenkins, the Kubernetes master nodes and the first worker node
+- The second machine only includes the second worker node.
+
+Jenkins.
+
+apt-get install -y python build-essential python-bashate
+wget https://bootstrap.pypa.io/get-pip.py
+python2 get-pip.py
+
+cd ~
+git clone "https://gerrit.akraino.org/r/icn"
+cd icn/ci
+
+Update Jenkins to the latest version available (2.238 at time of writing):
+sed -i "s/2.192/\"2.238\"/" vars.yaml
+
+Install Jenkins using Ansible playbook:
+./install_ansible.sh
+pip install -U ansible
+ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
+
+Basic Jenkins configuration using admin/admin credentials:
+mkdir -p ~/.config/jenkins_jobs
+cat << EOF | tee ~/.config/jenkins_jobs/jenkins_jobs.ini
+[job_builder]
+ignore_cache=True
+keep_descriptions=False
+recursive=True
+retain_anchors=True
+update=jobs
+
+[jenkins]
+user=admin
+password=admin
+url=http://localhost:8080
+EOF
+
+Access the web UI and add the jenkins-ssh credentials to communicate with Gerrit:
+Quick link: http://localhost:8080/credentials/store/system/domain/_/newCredentials.
+
+Here, create a new credential of Kind "SSH Username with private key":
+Set the following fields as such:
+Kind: "Global (...)"
+ID: "jenkins-ssh"
+Username: USERNAME
+Private key: here, paste the private key respective to the public key that has been uploaded for USERNAME at Gerrit.
+Since this documentation is for ICN, ICN Jenkins devs/maintainers should contact the ICN team to get the current private key.
+
+There is a second private/public keypair. This one is for accessing multiple nodes in the Kubernetes cluster.
+The private key should be placed where it can be accessed by Jenkins. Ideally a fresh keypair should be created at this point.
+The following creates a new/fresh keypair for the root user:
+
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+Info: this is the key that will later be assigned to CLUSTER_SSH_KEY -> CLUSTER_SSH_KEY=/var/lib/jenkins/jenkins-rsa
+
+Copy the private key of (~/.ssh/id_rsa) the keypair just created to/as /var/lib/jenkins/jenkins-rsa. Additionally make jenkins the owner of this key:
+cp ~/.ssh/id_rsa /var/lib/jenkins/jenkins-rsa
+chown jenkins:jenkins /var/lib/jenkins/jenkins-rsa
+
+In this guide, this keypair is also going to be re-used for accessing the Gerrit and ONAP repositories as non-CI (for basic operations such as cloning a repository).
+As such, the public key ~/.ssh/id_rsa.pub) just generated should be uploaded to the Gerrit and ONAP accounts to be used.
+
+Set Nexus login credentials in order to upload Bluval logs (replace USERNAME/PASSWORD)
+echo "machine nexus.akraino.org login USERNAME password PASSWORD" | tee /var/lib/jenkins/.netrc
+
+Also needed to upload Bluval logs is the lftools python3 package, install it:
+pip3 install lftools
+
+The Bluval job depends on templates and scripts from the ci-management repository:
+cd ~
+git clone --recursive "https://gerrit.akraino.org/r/ci-management"
+
+The following is temporary until patch https://gerrit.akraino.org/r/c/validation/+/3370 gets merged by the validation team.https://gerrit.akraino.org/r/c/validation/+/3370:
+sed -i 's/ssh:\/\/akraino-jobbuilder@gerrit.akraino.org:29418/https:\/\/github.com\/igordcard/' ci-management/jjb/defaults.yaml
+
+Let's finally get Jenkins to recognize the Bluval job:
+pip install jenkins-job-builder
+python2 -m jenkins_jobs test ci-management/jjb:icn/ci/jjb icn-bluval-daily-master
+python2 -m jenkins_jobs update ci-management/jjb:icn/ci/jjb icn-bluval-daily-master
+
+Recommendation: install the Rebuilder plugin to easily rebuild a job with the same/similar parameters:
+Go to: http://localhost:8080/pluginManager/available and install "Rebuilder", then restart Jenkins (will be done soon anyway).
+
+Since Jenkins will be running a job that calls Docker, it needs to have permissions to run Docker, so add jenkins user to the docker group:
+usermod -aG docker jenkins
+
+Restart Jenkins to apply new permissions (necessary) and finalize Rebuilder plugin installation:
+systemctl restart jenkins
+
+Kubernetes.
+
+Before running any job, the ICN/EMCO flavor of Kubernetes needs to be installed.
+Here is the current recommended procedure.
+
+Again, this guide assumed that:
+- There are a total of two machines.
+- The first machine includes Jenkins, the Kubernetes master nodes and the first worker node
+- The second machine only includes the second worker node.
+
+The first thing to do is have master node's SSH trust its own root@localhost. SSH to localhost and accept the connection to persist the fingerprint in ~/.ssh/known_hosts.
+ssh root@localhost
+Likewise, the master node should also trust root @ the worker node. SSH to it and accept the connection to persist the fingerprint in in ~/.ssh/known_hosts. This trust will be needed for Ansible to install the Kubernetes cluster (KUD).
+ssh root@WORKER_NODE_IPADDR
+
+At the master node (where Jenkins is already installed at this point), download KUD source code with Kubernetes 1.16 patch (this guide should be update once this patch is merged):
+cd ~
+apt-get install -y git-review
+git clone "https://gerrit.onap.org/r/multicloud/k8s"
+cd k8s
+git remote add gerrit https://GERRIT_USERNAME@gerrit.onap.org/r/a/multicloud/k8s
+git review -s
+git review -d 106869
+
+Replace all localhost references with $HOSTNAME: :%s/localhost/$HOSTNAME
+sed -i 's/localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
+
+Remove [ovn-central], [ovn-controller], [virtlet] and [cmk] groups (and contents) from the aio.sh file below:
+vim kud/hosting_providers/baremetal/aio.sh
+
+Configure KUD for multi-node by also modifying aio.sh:
+vim kud/hosting_providers/baremetal/aio.sh
+Specifically, the only change for this guide's dual-node deployment is to add the worker node details to the [all] and [kube-node] groups, like this:
+In [all], add line:
+WORKER_NODE_HOSTNAME ansible_ssh_host=WORKER_NODE_IPADDR ansible_ssh_port=22
+In [kube-node], add line:
+WORKER_NODE_HOSTNAME
+
+In installer.sh, disable KUD addons and plugins:
+vim kud/hosting_providers/vagrant/installer.sh
+The following lines (near the end of the file) can be commented, as such:
+# install_addons
+# if ${KUD_PLUGIN_ENABLED:-false}; then
+#     install_plugin
+# fi
+
+Finally install Kubernetes with KUD (ansible will automatically install it in the worker node too):
+kud/hosting_providers/baremetal/aio.sh
+
+At this point, everything is ready to jump over to http://localhost:8080, log-in using admin/admin credentials and create a new build for icn-bluval-daily-master.
+
+Assuming silo name being "yoursilo", for the build, here are the recommended parameters to set according to the deployment herein outlined as well as to conform to upstream Bluval logging requirements:
+
+DEPLOY_SCENARIO: master
+CLUSTER_MASTER_IP: localhost
+CLUSTER_SSH_USER: root
+CLUSTER_SSH_PASSWORD: <empty>
+CLUSTER_SSH_KEY: /var/lib/jenkins/jenkins-rsa
+BLUEPRINT: icn
+LAYER: <empty>
+VERSION: master
+OPTIONAL: no
+PULL: yes
+LAB_SILO: yoursilo
+SETTINGS_FILE: <empty>
+
+And pull the trigger.
+
+Total time to run should be anywhere from 2 to 3 hours on an average server-grade dual-node with good Internet connection (~90% of the time will be spent running the k8s layer conformance testing).
+
+The easiest way to check what logs have been uploaded to the Nexus is by opening the following URL:
+https://logs.akraino.org/yoursilo/bluval_results/icn/master/
