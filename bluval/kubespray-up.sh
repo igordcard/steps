@@ -7,15 +7,10 @@
 # only do this 1 machine -> the master
 #cd icn
 #make kud_bm_deploy_mini
-# 1.16 instead:
-apt-get install -y git-review
 git clone "https://gerrit.onap.org/r/multicloud/k8s"
 cd k8s
 ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa # maybe it was already done in jenkins-bluval.sh
 # >> copy public key to onap gerrit
-git remote add gerrit ssh://igordcard@gerrit.onap.org:29418/multicloud/k8s.git
-git review -s
-git review -d 106869
 
 # 1. replace all localhost with $HOSTNAME: :%s/localhost/$HOSTNAME
 sed -i 's/localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
