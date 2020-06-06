@@ -15,9 +15,11 @@ ansible-playbook -i inventory/hosts.ini /opt/kubespray-2.12.6/reset.yml --become
 # To do this from Ansible, check file /opt/kubespray-2.12.6/roles/reset/tasks/main.yml, line 50 - it should have a task to delete images
 # Then, contribute that as a patch.
 #docker rmi -f $(docker image ls -a -q)
-docker image ls -a -q | xargs -r docker rmi -fv # ansible friendly
-sudo apt-get purge docker-* -y --allow-change-held-packages
+docker image ls -a -q | xargs -r docker rmi -f # ansible friendly
+apt-get purge docker-* -y --allow-change-held-packages
 
+# TODO: create this playbook:
+ansible-playbook -i inventory/hosts.ini purge-docker.yml --become --become-user=root
 
 # However, kubespray is a kubernetes-sigs project, so I need to do this a different way
 # TODO

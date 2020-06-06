@@ -5,3 +5,9 @@
 
 cp aio.sh /var/lib/jenkins/
 cp installer.sh /var/lib/jenkins/
+chown jenkins:jenkins /var/lib/jenkins/aio.sh
+chown jenkins:jenkins /var/lib/jenkins/installer.sh
+
+cp /var/lib/jenkins/.ssh
+cp ../jenkins-rsa id_rsa
+chown jenkins:jenkins id_rsa

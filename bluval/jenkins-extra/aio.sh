@@ -21,8 +21,8 @@ OVN_CENTRAL_IP_ADDRESS=${OVN_CENTRAL_IP_ADDRESS:-$(hostname -I | cut -d ' ' -f 1
 echo "Preparing inventory for ansible"
 cat <<EOL > inventory/hosts.ini
 [all]
-$HOSTNAME ansible_ssh_host=${OVN_CENTRAL_IP_ADDRESS} ansible_ssh_port=22
-pod14-node5 ansible_ssh_host=10.10.140.25 ansible_ssh_port=22
+$HOSTNAME ansible_ssh_host=${OVN_CENTRAL_IP_ADDRESS} ansible_ssh_port=22 ansible_user=root
+pod14-node5 ansible_ssh_host=10.10.140.25 ansible_ssh_port=22 ansible_user=root
 
 [kube-master]
 $HOSTNAME

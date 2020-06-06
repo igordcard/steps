@@ -19,6 +19,8 @@ pip install -U ansible # otherwise will fail on jenkins plugins download
 ansible-playbook site_jenkins.yaml --extra-vars "@vars.yaml" -vvv
 
 echo "machine nexus.akraino.org login icn.jenkins password icngroup" | tee /var/lib/jenkins/.netrc
+chown jenkins:jenkins /var/lib/jenkins/.netrc
+chmod 600 /var/lib/jenkins/.netrc
 
 cd
 git clone --recursive "https://gerrit.akraino.org/r/ci-management"
