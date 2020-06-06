@@ -17,18 +17,3 @@ ansible-playbook -i inventory/hosts.ini /opt/kubespray-2.12.6/reset.yml --become
 #docker rmi -f $(docker image ls -a -q)
 docker image ls -a -q | xargs -r docker rmi -f # ansible friendly
 apt-get purge docker-* -y --allow-change-held-packages
-
-# TODO: create this playbook:
-ansible-playbook -i inventory/hosts.ini purge-docker.yml --become --become-user=root
-
-# However, kubespray is a kubernetes-sigs project, so I need to do this a different way
-# TODO
-- name: reset | remove all docker images
-  shell: "{{ docker_bin_dir }}/docker image ls -a -q | xargs -r docker rmi -fv"
-  register: remove_all_images
-  retries: 4
-  until: remove_all_images.rc == 0
-  delay: 5
-  when: container_manager == "docker"
-  tags:
-    - docker
