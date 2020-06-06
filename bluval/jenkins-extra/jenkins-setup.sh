@@ -9,11 +9,8 @@ cp installer.sh /var/lib/jenkins/
 chown jenkins:jenkins /var/lib/jenkins/aio.sh
 chown jenkins:jenkins /var/lib/jenkins/installer.sh
 
-# make jenkins-rsa key visibile in jenkins by default (TODO: something was refreshing the key..)
-cp /var/lib/jenkins/.ssh
+# make jenkins-rsa key visible in jenkins by default (TODO: something was refreshing the key..)
+cd /var/lib/jenkins/.ssh
+rm id_rsa*
 cp ../jenkins-rsa id_rsa
 chown jenkins:jenkins id_rsa
-
-# provide the custom playbook to wipe out docker after uninstalling KUD (TODO: should be contributed to multicloud-k8s)
-cp purge-docker.yml /var/lib/jenkins/
-chown jenkins:jenkins /var/lib/jenkins/purge-docker.yml
