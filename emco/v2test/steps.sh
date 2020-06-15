@@ -15,11 +15,13 @@ sed -i "s/\"ubuntu18\"/\"cluster-101\"/" Vagrantfile
 vagrant up
 VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" vagrant@$VAGRANT_IP_ADDR1
+ssh vagrant@$VAGRANT_IP_ADDR1 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 cd ../testing2
 sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
 vagrant up
 VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" vagrant@$VAGRANT_IP_ADDR2
+ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 popd
 cd multicloud-k8s
 
