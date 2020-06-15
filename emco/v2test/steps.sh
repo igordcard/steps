@@ -14,18 +14,18 @@ cd testing
 sed -i "s/\"ubuntu18\"/\"cluster-101\"/" Vagrantfile
 vagrant up
 VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" vagrant@$VAGRANT_IP_ADDR1
 cd ../testing2
 sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
 vagrant up
 VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" vagrant@$VAGRANT_IP_ADDR2
 popd
 cd multicloud-k8s
 
 # install kubernetes/docker using KUD AIO:
 sed -i 's/localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
 kud/hosting_providers/baremetal/aio.sh
-
-# TODO need to copy ssh public key to authorized hosts of VMs
 
 # if proxy is needed:
 # docker build  --rm \
