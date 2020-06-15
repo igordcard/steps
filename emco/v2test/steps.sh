@@ -99,5 +99,74 @@ kube-node
 kube-master
 EOF
 
-kubectl create secret generic ssh-key-secret --from-file=id_rsa=~/.ssh/id_rsa --from-file=id_rsa.pub=~/.ssh/id_rsa.pub
+cd kud/hosting_providers/containerized/
 ./installer.sh --install_pkg
+kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
+CLUSTER_NAME=cluster-101
+cat <<EOF | kubectl create -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kud-$CLUSTER_NAME
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      containers:
+        - name: kud
+          image: github.com/onap/multicloud-k8s:latest
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: multi-cluster
+            mountPath: /opt/kud/multi-cluster
+          - name: secret-volume
+            mountPath: "/.ssh"
+          command: ["/bin/sh","-c"]
+          args: ["cp -r /.ssh /root/; chmod -R 600 /root/.ssh; ./installer --cluster $CLUSTER_NAME --plugins onap4k8s"]
+          securityContext:
+            privileged: true
+      volumes:
+      - name: multi-cluster
+        hostPath:
+          path: /opt/kud/multi-cluster
+      - name: secret-volume
+        secret:
+          secretName: ssh-key-secret
+      restartPolicy: Never
+  backoffLimit: 0
+EOF
+#./installer.sh --cluster $CLUSTER_NAME
+CLUSTER_NAME=cluster-102
+cat <<EOF | kubectl create -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kud-$CLUSTER_NAME
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      containers:
+        - name: kud
+          image: github.com/onap/multicloud-k8s:latest
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: multi-cluster
+            mountPath: /opt/kud/multi-cluster
+          - name: secret-volume
+            mountPath: "/.ssh"
+          command: ["/bin/sh","-c"]
+          args: ["cp -r /.ssh /root/; chmod -R 600 /root/.ssh; ./installer --cluster $CLUSTER_NAME --plugins onap4k8s"]
+          securityContext:
+            privileged: true
+      volumes:
+      - name: multi-cluster
+        hostPath:
+          path: /opt/kud/multi-cluster
+      - name: secret-volume
+        secret:
+          secretName: ssh-key-secret
+      restartPolicy: Never
+  backoffLimit: 0
+EOF
+#./installer.sh --cluster $CLUSTER_NAME
