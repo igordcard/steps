@@ -5,6 +5,7 @@
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
 git clone https://github.com/onap/multicloud-k8s.git
+# + apply https://gerrit.onap.org/r/c/multicloud/k8s/+/107159
 pushd multicloud-k8s/kud/hosting_providers/vagrant
 ./setup.sh -p libvirt
 popd
@@ -74,6 +75,7 @@ c01
 kube-node
 kube-master
 EOF
+
 cat > /opt/kud/multi-cluster/cluster-102/hosts.ini <<EOF
 [all]
 c01 ansible_ssh_host=$VAGRANT_IP_ADDR2 ansible_ssh_port=22
@@ -101,8 +103,9 @@ kube-node
 kube-master
 EOF
 
-cd kud/hosting_providers/containerized/
 ./installer.sh --install_pkg
+
+pushd kud/hosting_providers/containerized/
 kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
 CLUSTER_NAME=cluster-101
 cat <<EOF | kubectl create -f -
@@ -138,6 +141,7 @@ spec:
   backoffLimit: 0
 EOF
 #./installer.sh --cluster $CLUSTER_NAME
+
 CLUSTER_NAME=cluster-102
 cat <<EOF | kubectl create -f -
 apiVersion: batch/v1
@@ -172,3 +176,10 @@ spec:
   backoffLimit: 0
 EOF
 #./installer.sh --cluster $CLUSTER_NAME
+
+kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-101/artifacts/admin.conf cluster-info
+kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-102/artifacts/admin.conf cluster-info
+
+popd
+cd multicloud-k8s
+docker build -f build/Dockerfile . -t mco
