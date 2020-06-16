@@ -105,9 +105,10 @@ kube-node
 kube-master
 EOF
 
-./installer.sh --install_pkg
-
 pushd kud/hosting_providers/containerized/
+./installer.sh --install_pkg
+popd
+
 kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
 CLUSTER_NAME=cluster-101
 cat <<EOF | kubectl create -f -
@@ -182,7 +183,6 @@ EOF
 kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-101/artifacts/admin.conf cluster-info
 kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-102/artifacts/admin.conf cluster-info
 
-popd
 cd multicloud-k8s
 docker build -f build/Dockerfile . -t mco
 
@@ -193,3 +193,5 @@ pushd multicloud-k8s/kud/hosting_providers/containerized/testing
 vagrant destroy -f
 cd ../testing2
 vagrant destroy -f
+kubectl delete job kud-cluster-101
+kubectl delete job kud-cluster-102
