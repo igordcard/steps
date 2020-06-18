@@ -1,11 +1,17 @@
 #!/bin/bash
 
-# bionic
+# run as root
 
-# first get k8s up and running with kubeadm1
-# kubeadm-up.sh
+# setup vagrant VMs
 
-# now istio
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-1.5.1/
-export PATH=$PWD/bin:$PATH
+
+
+# if k8s already running for emco, run this first:
+kubectl delete job kud-cluster-101
+kubectl delete job kud-cluster-102
+# and on each vagrant VM:
+helm delete multicloud-onap8ks --purge
+kubectl delete deployment nfn-operator --namespace operator
+kubectl delete deployment eaa --namespace openness
+kubectl delete daemonset nfn-agent --namespace operator
+kubectl delete daemonset ovn4nfv-cni --namespace operator
