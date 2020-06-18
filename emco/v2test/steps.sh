@@ -28,7 +28,7 @@ ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant
 popd
 cd multicloud-k8s
 
-# install kubernetes/docker using KUD AIO:
+# install kubernetes/docker using KUD AIO (global cluster):
 sed -i 's/localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
 kud/hosting_providers/baremetal/aio.sh
 
