@@ -80,25 +80,25 @@ EOF
 
 cat > /opt/kud/multi-cluster/cluster-102/hosts.ini <<EOF
 [all]
-c01 ansible_ssh_host=$VAGRANT_IP_ADDR2 ansible_ssh_port=22
+c02 ansible_ssh_host=$VAGRANT_IP_ADDR2 ansible_ssh_port=22
 
 [kube-master]
-c01
+c02
 
 [kube-node]
-c01
+c02
 
 [etcd]
-c01
+c02
 
 [ovn-central]
-c01
+c02
 
 [ovn-controller]
-c01
+c02
 
 [virtlet]
-c01
+c02
 
 [k8s-cluster:children]
 kube-node
