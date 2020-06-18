@@ -186,10 +186,10 @@ kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-102/artifacts/admin.conf clu
 cd multicloud-k8s
 docker build -f build/Dockerfile . -t mco
 
-cd deployments/helm/onap4k8s
+cd deployments/helm/v2/onap4k8s
 make repo
 make all
-helm install dist/packages/multicloud-k8s-5.0.0.tgz
+# make repo-stop
 
 # cleanup the VM clusters only
 popd
