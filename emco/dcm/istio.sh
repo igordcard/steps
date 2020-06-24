@@ -14,7 +14,7 @@
 # kubectl delete daemonset nfn-agent --namespace operator
 # kubectl delete daemonset ovn4nfv-cni --namespace operator
 
-# let's use whatever got deployed by emco kud job and put istio on top of it
+# let's use whatever got deployed by emco kud job (see v2test/steps.sh) and put istio on top of it
 
 ########### do the following in each cluster ###########
 export ISTIO_VERSION=1.6.3
@@ -60,3 +60,17 @@ data:
         forward . $(kubectl get svc -n istio-system istiocoredns -o jsonpath={.spec.clusterIP}):53
     }
 EOF
+
+# get IPs of each cluster in a different shell
+export VAGRANT_IP_ADDR1=192.168.121.112
+export VAGRANT_IP_ADDR2=192.168.121.223
+
+# at this point manually merge the ~/.kube/configs from the vagrant VMs into the main kube config
+# then it should look like:
+# root@pod11-node4:~# kubectl config get-contexts
+# CURRENT   NAME                           CLUSTER       AUTHINFO            NAMESPACE
+#           cluster-101-admin@kubernetes   cluster-101   cluster-101-admin
+#           cluster-102-admin@kubernetes   cluster-102   cluster-102-admin
+# *         kubernetes-admin@kubernetes    kubernetes    kubernetes-admin
+
+
