@@ -107,8 +107,8 @@ kubectl label --context=$CTX_CLUSTER2 namespace bar istio-injection=enabled
 kubectl apply --context=$CTX_CLUSTER2 -n bar -f samples/httpbin/httpbin.yaml
 
 # the following doesn't work, so I assume I need node port instead of load balancer:
-export CLUSTER2_GW_ADDR=$(kubectl get --context=$CTX_CLUSTER2 svc --selector=app=istio-ingressgateway \
-    -n istio-system -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
+#export CLUSTER2_GW_ADDR=$(kubectl get --context=$CTX_CLUSTER2 svc --selector=app=istio-ingressgateway \
+#    -n istio-system -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
 
 # so do this: https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports:
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}' --context=$CTX_CLUSTER2)
@@ -116,7 +116,7 @@ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressga
 export TCP_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="tcp")].nodePort}' --context=$CTX_CLUSTER2)
 export INGRESS_NODEPORT=$(kubectl --context=$CTX_CLUSTER2 get svc -n istio-system istio-ingressgateway -o=jsonpath='{.spec.ports[?(@.port==15443)].nodePort}')
 
-# going to risk it and assume the ingress IP (for the node port) I'm looking for is the  one of the cluster:
+# going to risk it and assume the ingress IP (for the node port) I'm looking for is the one of the cluster:
 export INGRESS_HOST=$VAGRANT_IP_ADDR2
 export CLUSTER2_GW_ADDR=$VAGRANT_IP_ADDR2
 
@@ -153,3 +153,43 @@ spec:
 EOF
 
 kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers
+# this did not work at well
+
+# moving on to https://istio.io/latest/docs/setup/install/multicluster/gateways/#send-remote-traffic-via-an-egress-gateway
+export CLUSTER1_EGW_ADDR=$(kubectl get --context=$CTX_CLUSTER1 svc --selector=app=istio-egressgateway \
+    -n istio-system -o yaml -o jsonpath='{.items[0].spec.clusterIP}')
+
+kubectl apply --context=$CTX_CLUSTER1 -n foo -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-bar
+spec:
+  hosts:
+  # must be of form name.namespace.global
+  - httpbin.bar.global
+  location: MESH_INTERNAL
+  ports:
+  - name: http1
+    number: 8000
+    protocol: http
+  resolution: STATIC
+  addresses:
+  - 240.0.0.2
+  endpoints:
+  - address: ${CLUSTER2_GW_ADDR}
+    network: external
+    ports:
+      http1: ${INGRESS_PORT} # Do not change this port value
+  - address: ${CLUSTER1_EGW_ADDR}
+    ports:
+      http1: ${INGRESS_PORT}
+EOF
+
+# cleanup
+kubectl delete --context=$CTX_CLUSTER1 -n foo -f samples/sleep/sleep.yaml
+kubectl delete --context=$CTX_CLUSTER1 -n foo serviceentry httpbin-bar
+kubectl delete --context=$CTX_CLUSTER1 ns foo
+kubectl delete --context=$CTX_CLUSTER2 -n bar -f samples/httpbin/httpbin.yaml
+kubectl delete --context=$CTX_CLUSTER2 ns bar
+unset SLEEP_POD CLUSTER2_GW_ADDR CLUSTER1_EGW_ADDR CTX_CLUSTER1 CTX_CLUSTER2
