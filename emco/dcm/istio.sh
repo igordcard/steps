@@ -153,7 +153,7 @@ spec:
 EOF
 
 kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers
-# this did not work at well
+# this did not work at all
 
 # moving on to https://istio.io/latest/docs/setup/install/multicluster/gateways/#send-remote-traffic-via-an-egress-gateway
 export CLUSTER1_EGW_ADDR=$(kubectl get --context=$CTX_CLUSTER1 svc --selector=app=istio-egressgateway \
@@ -185,6 +185,9 @@ spec:
     ports:
       http1: ${INGRESS_PORT}
 EOF
+
+kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers
+# doesn't work either
 
 # cleanup
 kubectl delete --context=$CTX_CLUSTER1 -n foo -f samples/sleep/sleep.yaml
