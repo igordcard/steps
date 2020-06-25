@@ -119,3 +119,37 @@ export INGRESS_NODEPORT=$(kubectl --context=$CTX_CLUSTER2 get svc -n istio-syste
 # going to risk it and assume the ingress IP (for the node port) I'm looking for is the  one of the cluster:
 export INGRESS_HOST=$VAGRANT_IP_ADDR2
 export CLUSTER2_GW_ADDR=$VAGRANT_IP_ADDR2
+
+kubectl apply --context=$CTX_CLUSTER1 -n foo -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-bar
+spec:
+  hosts:
+  # must be of form name.namespace.global
+  - httpbin.bar.global
+  # Treat remote cluster services as part of the service mesh
+  # as all clusters in the service mesh share the same root of trust.
+  location: MESH_INTERNAL
+  ports:
+  - name: http1
+    number: 8000
+    protocol: http
+  resolution: DNS
+  addresses:
+  # the IP address to which httpbin.bar.global will resolve to
+  # must be unique for each remote service, within a given cluster.
+  # This address need not be routable. Traffic for this IP will be captured
+  # by the sidecar and routed appropriately.
+  - 240.0.0.2
+  endpoints:
+  # This is the routable address of the ingress gateway in cluster2 that
+  # sits in front of sleep.foo service. Traffic from the sidecar will be
+  # routed to this address.
+  - address: ${CLUSTER2_GW_ADDR}
+    ports:
+      http1: ${INGRESS_PORT} # Do not change this port value
+EOF
+
+kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers
