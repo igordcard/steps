@@ -196,3 +196,11 @@ kubectl delete --context=$CTX_CLUSTER1 ns foo
 kubectl delete --context=$CTX_CLUSTER2 -n bar -f samples/httpbin/httpbin.yaml
 kubectl delete --context=$CTX_CLUSTER2 ns bar
 unset SLEEP_POD CLUSTER2_GW_ADDR CLUSTER1_EGW_ADDR CTX_CLUSTER1 CTX_CLUSTER2
+
+# delete deployments according to v2test/steps.sh as well
+# and wipe out k8s/docker:
+cd ~/multicloud-k8s/kud/hosting_providers/vagrant
+ansible-playbook -i inventory/hosts.ini /opt/kubespray-2.12.6/reset.yml --become --become-user=root -e reset_confirmation=yes
+docker image ls -a -q | xargs -r docker rmi -f # ansible friendly
+apt-get purge docker-* -y --allow-change-held-packages
+reboot
