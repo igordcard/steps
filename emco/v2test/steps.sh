@@ -2,6 +2,9 @@
 
 # run as root
 
+
+# prepare the host / global k8s:
+
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
 git clone https://github.com/onap/multicloud-k8s.git
@@ -9,24 +12,7 @@ git clone https://github.com/onap/multicloud-k8s.git
 pushd multicloud-k8s/kud/hosting_providers/vagrant
 ./setup.sh -p libvirt
 popd
-pushd multicloud-k8s/kud/hosting_providers/containerized
-cp -R testing testing2
-cd testing
-sed -i "s/\"ubuntu18\"/\"cluster-101\"/" Vagrantfile
-sed -i "s/32768/20480/" Vagrantfile
-vagrant up
-export VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
-ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR1
-ssh vagrant@$VAGRANT_IP_ADDR1 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
-cd ../testing2
-sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
-sed -i "s/32768/20480/" Vagrantfile
-vagrant up
-export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
-ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
-ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
-popd
-cd multicloud-k8s
+pushd multicloud-k8s
 
 # install kubernetes/docker using KUD AIO (global cluster):
 sed -i 's/localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
@@ -50,6 +36,27 @@ docker build  --rm \
     --build-arg KUD_ENABLE_TESTS=true \
     --build-arg KUD_PLUGIN_ENABLED=true \
     -t github.com/onap/multicloud-k8s:latest . -f kud/build/Dockerfile
+
+popd
+
+# prepare the vagrant vms for the cluster:
+pushd multicloud-k8s/kud/hosting_providers/containerized
+cp -R testing testing2
+cd testing
+sed -i "s/\"ubuntu18\"/\"cluster-101\"/" Vagrantfile
+sed -i "s/32768/20480/" Vagrantfile
+vagrant up
+export VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR1
+ssh vagrant@$VAGRANT_IP_ADDR1 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+cd ../testing2
+sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
+sed -i "s/32768/20480/" Vagrantfile
+vagrant up
+export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
+ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+popd
 
 mkdir -p /opt/kud/multi-cluster/{cluster-101,cluster-102}
 
