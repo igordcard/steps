@@ -17,6 +17,8 @@
 # let's use whatever got deployed by emco kud job (see v2test/steps.sh) and put istio on top of it
 
 ########### do the following in each cluster ###########
+#ssh root@$VAGRANT_IP_ADDR1
+#ssh root@$VAGRANT_IP_ADDR2
 export ISTIO_VERSION=1.6.3
 curl -L https://istio.io/downloadIstio | sh -
 cd istio-$ISTIO_VERSION
@@ -30,6 +32,46 @@ kubectl create secret generic cacerts -n istio-system \
 istioctl install \
     -f manifests/examples/multicluster/values-istio-multicluster-gateways.yaml
 
+# logout back to global cluster
+
+############### global cluster ###############
+
+# get IPs of each cluster in a different shell
+#export VAGRANT_IP_ADDR1=192.168.121.112
+#export VAGRANT_IP_ADDR2=192.168.121.223
+
+# at this point manually merge the ~/.kube/configs from the vagrant VMs into the main kube config
+# then it should look like:
+# root@pod11-node4:~# kubectl config get-contexts
+# CURRENT   NAME                           CLUSTER       AUTHINFO            NAMESPACE
+#           cluster-101-admin@kubernetes   cluster-101   cluster-101-admin
+#           cluster-102-admin@kubernetes   cluster-102   cluster-102-admin
+# *         kubernetes-admin@kubernetes    kubernetes    kubernetes-admin
+
+# this automates the above:
+scp root@$VAGRANT_IP_ADDR1:.kube/config ~/.kube/kubeconfig-c01
+scp root@$VAGRANT_IP_ADDR2:.kube/config ~/.kube/kubeconfig-c02
+sed -i "s/kubernetes-admin/cluster-101-admin/" ~/.kube/kubeconfig-c01
+sed -i "s/kubernetes-admin/cluster-102-admin/" ~/.kube/kubeconfig-c02
+
+export KUBECONFIG=/root/.kube/config:/root/.kube/kubeconfig-c01:/root/.kube/kubeconfig-c02
+kubectl config use-context kubernetes-admin@kubernetes
+
+#kubectl config use-context kubernetes-admin@kubernetes
+#kubectl config use-context cluster-101-admin@cluster-101
+#kubectl config use-context cluster-102-admin@cluster-102
+
+export CTX_CLUSTER1=$(kubectl config view -o jsonpath='{.contexts[0].name}')
+export CTX_CLUSTER2=$(kubectl config view -o jsonpath='{.contexts[1].name}')
+
+# # fetch istio also in the global cluster now that kubeconfig is configured
+# export ISTIO_VERSION=1.6.3
+# curl -L https://istio.io/downloadIstio | sh -
+# cd istio-$ISTIO_VERSION
+# export PATH=$PWD/bin:$PATH
+
+# install CoreDNS>1.4.0 on cluster 1
+kubectl config use-context $CTX_CLUSTER1
 kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
@@ -61,41 +103,9 @@ data:
     }
 EOF
 
-############### global cluster ###############
-
-# get IPs of each cluster in a different shell
-export VAGRANT_IP_ADDR1=192.168.121.112
-export VAGRANT_IP_ADDR2=192.168.121.223
-
-# at this point manually merge the ~/.kube/configs from the vagrant VMs into the main kube config
-# then it should look like:
-# root@pod11-node4:~# kubectl config get-contexts
-# CURRENT   NAME                           CLUSTER       AUTHINFO            NAMESPACE
-#           cluster-101-admin@kubernetes   cluster-101   cluster-101-admin
-#           cluster-102-admin@kubernetes   cluster-102   cluster-102-admin
-# *         kubernetes-admin@kubernetes    kubernetes    kubernetes-admin
-
-# this automates the above:
-scp root@$VAGRANT_IP_ADDR1:.kube/config ~/.kube/kubeconfig-c01
-scp root@$VAGRANT_IP_ADDR2:.kube/config ~/.kube/kubeconfig-c02
-sed -i "s/kubernetes-admin/cluster-101-admin/" ~/.kube/kubeconfig-c01
-sed -i "s/kubernetes-admin/cluster-102-admin/" ~/.kube/kubeconfig-c02
-
-export KUBECONFIG=/root/.kube/config:/root/.kube/kubeconfig-c01:/root/.kube/kubeconfig-c02
-
-#kubectl config use-context kubernetes-admin@kubernetes
-#kubectl config use-context cluster-101-admin@cluster-101
-#kubectl config use-context cluster-102-admin@cluster-102
-
-export CTX_CLUSTER1=$(kubectl config view -o jsonpath='{.contexts[0].name}')
-export CTX_CLUSTER2=$(kubectl config view -o jsonpath='{.contexts[1].name}')
-
-# fetch istio also in the global controller now that kubeconfig is configured
-
-export ISTIO_VERSION=1.6.3
-curl -L https://istio.io/downloadIstio | sh -
-cd istio-$ISTIO_VERSION
-export PATH=$PWD/bin:$PATH
+# install CoreDNS>1.4.0 on cluster 2
+kubectl config use-context $CTX_CLUSTER2
+# > repeat step above.
 
 kubectl create --context=$CTX_CLUSTER1 namespace foo
 kubectl label --context=$CTX_CLUSTER1 namespace foo istio-injection=enabled

@@ -114,7 +114,7 @@ kube-node
 kube-master
 EOF
 
-pushd kud/hosting_providers/containerized/
+pushd multicloud-k8s/kud/hosting_providers/containerized/
 ./installer.sh --install_pkg
 popd
 
@@ -191,6 +191,8 @@ EOF
 
 kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-101/artifacts/admin.conf cluster-info
 kubectl --kubeconfig=/opt/kud/multi-cluster/cluster-102/artifacts/admin.conf cluster-info
+
+# for testing EMCO v2 only:
 
 cd multicloud-k8s
 docker build -f build/Dockerfile . -t mco
