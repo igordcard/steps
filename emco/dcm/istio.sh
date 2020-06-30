@@ -205,12 +205,19 @@ kubectl delete --context=$CTX_CLUSTER1 -n foo serviceentry httpbin-bar
 kubectl delete --context=$CTX_CLUSTER1 ns foo
 kubectl delete --context=$CTX_CLUSTER2 -n bar -f samples/httpbin/httpbin.yaml
 kubectl delete --context=$CTX_CLUSTER2 ns bar
+kubectl delete --context=$CTX_CLUSTER1 ns istio-system
+kubectl delete --context=$CTX_CLUSTER2 ns istio-system
 unset SLEEP_POD CLUSTER2_GW_ADDR CLUSTER1_EGW_ADDR CTX_CLUSTER1 CTX_CLUSTER2
+
+istioctl manifest generate \
+    -f manifests/examples/multicluster/values-istio-multicluster-gateways.yaml \
+    | kubectl delete -f -
+kubectl delete secret generic cacerts -n istio-system
 
 # delete deployments according to v2test/steps.sh as well
 # and wipe out k8s/docker:
 cd ~/multicloud-k8s/kud/hosting_providers/vagrant
 ansible-playbook -i inventory/hosts.ini /opt/kubespray-2.12.6/reset.yml --become --become-user=root -e reset_confirmation=yes
-docker image ls -a -q | xargs -r docker rmi -f # ansible friendly
+docker image ls -a -q | xargs -r docker rmi -f
 apt-get purge docker-* -y --allow-change-held-packages
 reboot
