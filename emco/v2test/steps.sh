@@ -43,6 +43,8 @@ pushd multicloud-k8s/kud/hosting_providers/containerized/
 ./installer.sh --install_pkg
 popd
 
+kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
+
 # prepare the vagrant vms for the cluster:
 pushd multicloud-k8s/kud/hosting_providers/containerized
 cp -R testing testing2
@@ -119,8 +121,6 @@ kube-master
 EOF
 
 # launch the jobs that install k8s on the VMs
-
-kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
 CLUSTER_NAME=cluster-101
 cat <<EOF | kubectl create -f -
 apiVersion: batch/v1
@@ -155,7 +155,6 @@ spec:
   backoffLimit: 0
 EOF
 #./installer.sh --cluster $CLUSTER_NAME
-
 CLUSTER_NAME=cluster-102
 cat <<EOF | kubectl create -f -
 apiVersion: batch/v1

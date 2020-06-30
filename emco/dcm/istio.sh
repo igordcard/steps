@@ -18,8 +18,7 @@
 
 ########### do the following in each cluster ###########
 #ssh root@$VAGRANT_IP_ADDR1
-#ssh root@$VAGRANT_IP_ADDR2
-export ISTIO_VERSION=1.6.3
+export ISTIO_VERSION=1.6.4
 curl -L https://istio.io/downloadIstio | sh -
 cd istio-$ISTIO_VERSION
 export PATH=$PWD/bin:$PATH
@@ -31,6 +30,8 @@ kubectl create secret generic cacerts -n istio-system \
     --from-file=samples/certs/cert-chain.pem
 istioctl install \
     -f manifests/examples/multicluster/values-istio-multicluster-gateways.yaml
+#ssh root@$VAGRANT_IP_ADDR2
+# repeat above for second cluster
 
 # logout back to global cluster
 
@@ -63,12 +64,6 @@ kubectl config use-context kubernetes-admin@kubernetes
 
 export CTX_CLUSTER1=$(kubectl config view -o jsonpath='{.contexts[0].name}')
 export CTX_CLUSTER2=$(kubectl config view -o jsonpath='{.contexts[1].name}')
-
-# # fetch istio also in the global cluster now that kubeconfig is configured
-# export ISTIO_VERSION=1.6.3
-# curl -L https://istio.io/downloadIstio | sh -
-# cd istio-$ISTIO_VERSION
-# export PATH=$PWD/bin:$PATH
 
 # install CoreDNS>1.4.0 on cluster 1
 kubectl config use-context $CTX_CLUSTER1
