@@ -39,6 +39,10 @@ docker build  --rm \
 
 popd
 
+pushd multicloud-k8s/kud/hosting_providers/containerized/
+./installer.sh --install_pkg
+popd
+
 # prepare the vagrant vms for the cluster:
 pushd multicloud-k8s/kud/hosting_providers/containerized
 cp -R testing testing2
@@ -114,9 +118,7 @@ kube-node
 kube-master
 EOF
 
-pushd multicloud-k8s/kud/hosting_providers/containerized/
-./installer.sh --install_pkg
-popd
+# launch the jobs that install k8s on the VMs
 
 kubectl create secret generic ssh-key-secret --from-file=id_rsa=/root/.ssh/id_rsa --from-file=id_rsa.pub=/root/.ssh/id_rsa.pub
 CLUSTER_NAME=cluster-101
