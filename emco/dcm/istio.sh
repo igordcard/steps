@@ -37,26 +37,21 @@ istioctl install \
 
 ############### global cluster ###############
 
-# get IPs of each cluster in a different shell
-#export VAGRANT_IP_ADDR1=192.168.121.112
-#export VAGRANT_IP_ADDR2=192.168.121.223
+# if env is gone, get IP addrs of each cluster again:
+pushd ~/multicloud-k8s/kud/hosting_providers/containerized/testing
+export VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+cd ../testing2
+export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+popd
 
-# at this point manually merge the ~/.kube/configs from the vagrant VMs into the main kube config
-# then it should look like:
-# root@pod11-node4:~# kubectl config get-contexts
-# CURRENT   NAME                           CLUSTER       AUTHINFO            NAMESPACE
-#           cluster-101-admin@kubernetes   cluster-101   cluster-101-admin
-#           cluster-102-admin@kubernetes   cluster-102   cluster-102-admin
-# *         kubernetes-admin@kubernetes    kubernetes    kubernetes-admin
-
-# this automates the above:
+# merge all kubeconfigs into single one and use context from here on:
 scp root@$VAGRANT_IP_ADDR1:.kube/config ~/.kube/kubeconfig-c01
 scp root@$VAGRANT_IP_ADDR2:.kube/config ~/.kube/kubeconfig-c02
 sed -i "s/kubernetes-admin/cluster-101-admin/" ~/.kube/kubeconfig-c01
 sed -i "s/kubernetes-admin/cluster-102-admin/" ~/.kube/kubeconfig-c02
-
 export KUBECONFIG=/root/.kube/config:/root/.kube/kubeconfig-c01:/root/.kube/kubeconfig-c02
 kubectl config use-context kubernetes-admin@kubernetes
+kubectl config get-contexts
 
 #kubectl config use-context kubernetes-admin@kubernetes
 #kubectl config use-context cluster-101-admin@cluster-101
@@ -64,6 +59,7 @@ kubectl config use-context kubernetes-admin@kubernetes
 
 export CTX_CLUSTER1=$(kubectl config view -o jsonpath='{.contexts[0].name}')
 export CTX_CLUSTER2=$(kubectl config view -o jsonpath='{.contexts[1].name}')
+echo CTX_CLUSTER1 = ${CTX_CLUSTER1}, CTX_CLUSTER2 = ${CTX_CLUSTER2}
 
 # install CoreDNS>1.4.0 on cluster 1
 kubectl config use-context $CTX_CLUSTER1
@@ -97,10 +93,14 @@ data:
         forward . $(kubectl get svc -n istio-system istiocoredns -o jsonpath={.spec.clusterIP}):53
     }
 EOF
-
 # install CoreDNS>1.4.0 on cluster 2
 kubectl config use-context $CTX_CLUSTER2
 # > repeat step above.
+
+kubectl config use-context kubernetes-admin@kubernetes
+
+# fetch istio on the global cluster at this point as well, to avoid SSHing
+cd istio-1.6.3
 
 kubectl create --context=$CTX_CLUSTER1 namespace foo
 kubectl label --context=$CTX_CLUSTER1 namespace foo istio-injection=enabled
