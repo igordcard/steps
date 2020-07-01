@@ -154,7 +154,7 @@ spec:
   # routed to this address.
   - address: ${CLUSTER2_GW_ADDR}
     ports:
-      http1: ${INGRESS_PORT} # Do not change this port value
+      http1: ${INGRESS_NODEPORT} # Do not change this port value
 EOF
 
 kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers

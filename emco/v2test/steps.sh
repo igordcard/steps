@@ -50,14 +50,14 @@ pushd multicloud-k8s/kud/hosting_providers/containerized
 cp -R testing testing2
 cd testing
 sed -i "s/\"ubuntu18\"/\"cluster-101\"/" Vagrantfile
-sed -i "s/32768/20480/" Vagrantfile
+sed -i "s/32768/16384/" Vagrantfile
 vagrant up
 export VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR1
 ssh vagrant@$VAGRANT_IP_ADDR1 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 cd ../testing2
 sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
-sed -i "s/32768/20480/" Vagrantfile
+sed -i "s/32768/16384/" Vagrantfile
 vagrant up
 export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
