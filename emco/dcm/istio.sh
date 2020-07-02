@@ -16,6 +16,8 @@
 
 # let's use whatever got deployed by emco kud job (see v2test/steps.sh) and put istio on top of it
 
+# with small tweaks this can also be used with touching a separate global cluster (only using the 2 VMs)
+
 ########### do the following in each cluster ###########
 #ssh root@$VAGRANT_IP_ADDR1
 export ISTIO_VERSION=1.6.4
@@ -49,6 +51,9 @@ scp root@$VAGRANT_IP_ADDR1:.kube/config ~/.kube/kubeconfig-c01
 scp root@$VAGRANT_IP_ADDR2:.kube/config ~/.kube/kubeconfig-c02
 sed -i "s/kubernetes-admin/cluster-101-admin/" ~/.kube/kubeconfig-c01
 sed -i "s/kubernetes-admin/cluster-102-admin/" ~/.kube/kubeconfig-c02
+# if installed without kud job:
+#sed -i "s/kubernetes/cluster-101-admin/" ~/.kube/kubeconfig-c01
+#sed -i "s/kubernetes/cluster-102-admin/" ~/.kube/kubeconfig-c02
 export KUBECONFIG=/root/.kube/config:/root/.kube/kubeconfig-c01:/root/.kube/kubeconfig-c02
 kubectl config use-context kubernetes-admin@kubernetes
 kubectl config get-contexts
@@ -170,10 +175,12 @@ kubectl delete --context=$CTX_CLUSTER1 ns istio-system
 kubectl delete --context=$CTX_CLUSTER2 ns istio-system
 unset SLEEP_POD CLUSTER2_GW_ADDR CLUSTER1_EGW_ADDR CTX_CLUSTER1 CTX_CLUSTER2
 
+# inside each cluster VM:
 istioctl manifest generate \
     -f manifests/examples/multicluster/values-istio-multicluster-gateways.yaml \
     | kubectl delete -f -
 kubectl delete secret generic cacerts -n istio-system
+reboot
 
 # delete deployments according to v2test/steps.sh as well
 # and wipe out k8s/docker:
