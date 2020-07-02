@@ -3,7 +3,7 @@
 # run as root
 # setup vagrant VMs
 # do not use KUD jobs to install k8s on VM clusters
-# with small tweaks this can also be used with touching a separate global cluster (only using the 2 VMs)
+# with small tweaks this can also be used without touching a separate global cluster (only using the 2 VMs)
 
 ########### do the following in each cluster ###########
 #ssh root@$VAGRANT_IP_ADDR1
