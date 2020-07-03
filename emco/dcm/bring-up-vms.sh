@@ -20,9 +20,17 @@ ssh vagrant@$VAGRANT_IP_ADDR1 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant
 cp Vagrantfile ../testing2/Vagrantfile
 
 cd ../testing2
-sed -i "s/\"ubuntu18\"/\"cluster-102\"/" Vagrantfile
+sed -i "s/\"cluster-101\"/\"cluster-102\"/" Vagrantfile
 vagrant up
 export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
 ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 cd
+
+# if vars lost:
+cd
+pushd ~/multicloud-k8s/kud/hosting_providers/containerized/testing
+export VAGRANT_IP_ADDR1=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+cd ../testing2
+export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+popd

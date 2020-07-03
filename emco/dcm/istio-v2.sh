@@ -145,7 +145,7 @@ spec:
 EOF
 
 kubectl exec --context=$CTX_CLUSTER1 $SLEEP_POD -n foo -c sleep -- curl -I httpbin.bar.global:8000/headers
-# this did not work at all
+# yes, it works - just not with KUD job installation
 
 # cleanup
 kubectl delete --context=$CTX_CLUSTER1 -n foo -f samples/sleep/sleep.yaml

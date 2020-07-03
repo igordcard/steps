@@ -2,6 +2,8 @@
 
 # run as root
 
+ssh root@$VAGRANT_IP_ADDR1
+ssh root@$VAGRANT_IP_ADDR2
 # this is for a single cluster in a single machine
 
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
