@@ -3,8 +3,6 @@
 # run as root
 
 ssh root@$VAGRANT_IP_ADDR1
-ssh root@$VAGRANT_IP_ADDR2
-# this is for a single cluster in a single machine
 
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
@@ -23,3 +21,7 @@ vim kud/hosting_providers/vagrant/installer.sh
 
 # deploy KUD
 kud/hosting_providers/baremetal/aio.sh
+
+exit
+# repeat the above but for:
+ssh root@$VAGRANT_IP_ADDR2
