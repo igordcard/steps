@@ -47,24 +47,23 @@ popd
 echo "Compiling source code"
 pushd $k8s_path/src/dcm/
 #generate_k8sconfig
-# cat > k8sconfig.json << EOF
-# {
-#     "database-address": "$DATABASE_IP",
-#     "database-ip": "$DATABASE_IP",
-#     "database-type": "mongo",
-#     "plugin-dir": "plugins",
-#     "service-port": "9015",
-#     "ca-file": "ca.cert",
-#     "server-cert": "server.cert",
-#     "server-key": "server.key",
-#     "password": "",
-#     "etcd-ip": "127.0.0.1",
-#     "etcd-cert": "",
-#     "etcd-key": "",
-#     "etcd-ca-file": ""
-# }
-# EOF
-# source ~/.profile
+cat > config.json << EOF
+{
+    "database-ip": "$DATABASE_IP",
+    "database-type": "mongo",
+    "plugin-dir": "plugins",
+    "service-port": "9015",
+    "ca-file": "ca.cert",
+    "server-cert": "server.cert",
+    "server-key": "server.key",
+    "password": "",
+    "etcd-ip": "$ETCD_IP",
+    "etcd-cert": "",
+    "etcd-key": "",
+    "etcd-ca-file": ""
+}
+EOF
+source ~/.profile
 make all
 ./dcm
 popd
