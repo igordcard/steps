@@ -42,7 +42,8 @@ pushd $k8s_path/src/dcm/
 #generate_k8sconfig
 cat > k8sconfig.json << EOF
 {
-    "database-address": "172.18.0.2",
+    "database-address": "$DATABASE_IP",
+    "database-ip": "$DATABASE_IP",
     "database-type": "mongo",
     "plugin-dir": "plugins",
     "service-port": "9015",
