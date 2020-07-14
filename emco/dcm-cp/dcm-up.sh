@@ -36,27 +36,34 @@ volumes:
     driver: local
 EOF
 docker-compose up -d etcd
+export ETCD_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=etcd"))
+
+# prep config for dcm via orchestrator config.go
+pushd $k8s_path/src/orchestrator/pkg/infra/config
+sed -i "s/DatabaseIP:             \"127.0.0.1\"/DatabaseIP:             \"$DATABASE_IP\"/" config.go
+sed -i "s/EtcdIP:                 \"127.0.0.1\"/EtcdIP:                 \"$ETCD_IP\"/" config.go
+popd
 
 echo "Compiling source code"
 pushd $k8s_path/src/dcm/
 #generate_k8sconfig
-cat > k8sconfig.json << EOF
-{
-    "database-address": "$DATABASE_IP",
-    "database-ip": "$DATABASE_IP",
-    "database-type": "mongo",
-    "plugin-dir": "plugins",
-    "service-port": "9015",
-    "ca-file": "ca.cert",
-    "server-cert": "server.cert",
-    "server-key": "server.key",
-    "password": "",
-    "etcd-ip": "127.0.0.1",
-    "etcd-cert": "",
-    "etcd-key": "",
-    "etcd-ca-file": ""
-}
-EOF
+# cat > k8sconfig.json << EOF
+# {
+#     "database-address": "$DATABASE_IP",
+#     "database-ip": "$DATABASE_IP",
+#     "database-type": "mongo",
+#     "plugin-dir": "plugins",
+#     "service-port": "9015",
+#     "ca-file": "ca.cert",
+#     "server-cert": "server.cert",
+#     "server-key": "server.key",
+#     "password": "",
+#     "etcd-ip": "127.0.0.1",
+#     "etcd-cert": "",
+#     "etcd-key": "",
+#     "etcd-ca-file": ""
+# }
+# EOF
 # source ~/.profile
 make all
 ./dcm
