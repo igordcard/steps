@@ -13,3 +13,4 @@ cd ~/multicloud-k8s/src/dcm
 ./dcm &
 cd ~/multicloud-k8s/src/dcm/test
 ./dcm_call_api.sh
+./dcm_call_api.sh clean
