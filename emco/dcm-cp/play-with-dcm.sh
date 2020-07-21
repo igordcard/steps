@@ -14,3 +14,7 @@ cd ~/multicloud-k8s/src/dcm
 cd ~/multicloud-k8s/src/dcm/test
 ./dcm_call_api.sh
 ./dcm_call_api.sh clean
+
+# Apply
+./dcm_call_api.sh
+curl -X POST localhost:9015/v2/projects/test-project/logical-clouds/lc1/apply
