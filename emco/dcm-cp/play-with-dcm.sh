@@ -18,3 +18,6 @@ cd ~/multicloud-k8s/src/dcm/test
 # Apply
 ./dcm_call_api.sh
 curl -X POST localhost:9015/v2/projects/test-project/logical-clouds/lc1/apply
+
+# Check etcd
+ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 endpoint health
