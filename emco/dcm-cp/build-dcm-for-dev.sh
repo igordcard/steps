@@ -72,3 +72,20 @@ cat > $WORKDIR/src/dcm/config.json << EOF
 }
 EOF
 
+# easily bring up emco for dev
+sed -i '/emco/d' ~/.bashrc
+cat >> ~/.bashrc << EOF
+alias emco='tmux new-session -s emco "tmux source-file ~/.tmux.conf"'
+EOF
+cat > ~/.tmux.conf << EOF
+new
+neww
+rename-window mco
+send-keys 'cd $WORKDIR/src/orchestrator && ./orchestrator' Enter
+splitw -h
+send-keys 'cd $WORKDIR/src/clm && ./clm' Enter
+neww
+rename-window dcm
+send-keys 'cd $WORKDIR/src/dcm && ./dcm' Enter
+#splitw -v
+EOF
