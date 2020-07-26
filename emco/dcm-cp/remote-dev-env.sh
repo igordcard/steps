@@ -14,7 +14,7 @@ k8s_ip=192.168.121.203
 jump_ip=10.10.110.24
 
 # set up connection
-ssh -L 2200:$dev_ip:22 root@$jump_ip
+ssh -fNT -L 2200:$dev_ip:22 root@$jump_ip
 
 # ssh config:
 cat >> ~/.ssh/config << EOF
