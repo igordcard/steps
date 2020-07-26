@@ -84,6 +84,9 @@ rename-window mco
 send-keys 'cd $WORKDIR/src/orchestrator && ./orchestrator' Enter
 splitw -h
 send-keys 'cd $WORKDIR/src/clm && ./clm' Enter
+splitw -h
+send-keys 'cd $WORKDIR/src/rsync && ./rsync' Enter
+select-layout even-horizontal
 neww
 rename-window dcm
 send-keys 'cd $WORKDIR/src/dcm && ./dcm' Enter
