@@ -89,3 +89,16 @@ rename-window dcm
 send-keys 'cd $WORKDIR/src/dcm && ./dcm' Enter
 #splitw -v
 EOF
+
+# at this point, copy .kube/config from intended cluster and test
+# connectivity with kubectl before adding the cluster to clm
+
+# run EMCO on tmux:
+emco
+
+# Create test-project Project before using any API
+cd $WORKDIR/src/orchestrator
+cat > create-project.json << EOF
+{"metadata": {"name": "test-project"}}
+EOF
+curl --header "Content-Type: application/json" --request POST --data @create-project.json http://127.0.0.1:9015/v2/projects
