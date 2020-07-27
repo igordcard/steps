@@ -17,10 +17,17 @@ cd ~/multicloud-k8s/src/dcm/test
 
 # Apply
 ./dcm_call_api.sh
+
 curl -X POST 127.0.0.1:9077/v2/projects/test-project/logical-clouds/lc1/apply
 
 # Check etcd
 ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 endpoint health
+
+# Get all keys from etcd
+ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 get / --keys-only
+
+# Get all key-values from etcd
+ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 get "" --prefix=true
 
 # Wipe etcd
 ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 del "" --from-key=true
