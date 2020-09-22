@@ -18,8 +18,8 @@ k8s_path="$(git rev-parse --show-toplevel)"
 
 apt-get install -y docker-compose build-essential
 
-stop_all
-start_mongo
+#stop_all
+#start_mongo
 # install etcd
 cat >> docker-compose.yml << \EOF
   etcd:
@@ -52,7 +52,7 @@ cat > config.json << EOF
     "database-ip": "$DATABASE_IP",
     "database-type": "mongo",
     "plugin-dir": "plugins",
-    "service-port": "9015",
+    "service-port": "9077",
     "ca-file": "ca.cert",
     "server-cert": "server.cert",
     "server-key": "server.key",
