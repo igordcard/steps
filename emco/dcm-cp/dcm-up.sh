@@ -44,6 +44,26 @@ sed -i "s/DatabaseIP:             \"127.0.0.1\"/DatabaseIP:             \"$DATAB
 sed -i "s/EtcdIP:                 \"127.0.0.1\"/EtcdIP:                 \"$ETCD_IP\"/" config.go
 popd
 
+# orchestrator's config.json:
+pushd $k8s_path/src/orchestrator
+cat > config.json << EOF
+{
+    "ca-file": "ca.cert",
+    "server-cert": "server.cert",
+    "server-key": "server.key",
+    "password": "",
+    "database-ip": "$DATABASE_IP",
+    "database-type": "mongo",
+    "plugin-dir": "plugins",
+    "etcd-ip": "$ETCD_IP",
+    "etcd-cert": "",
+    "etcd-key": "",
+    "etcd-ca-file": "",
+    "service-port": "9015",
+    "log-level": "warn"
+}
+EOF
+
 echo "Compiling source code"
 pushd $k8s_path/src/dcm/
 #generate_k8sconfig
