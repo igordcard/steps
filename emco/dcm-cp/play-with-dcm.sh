@@ -31,3 +31,10 @@ ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 get "" --prefix=true
 
 # Wipe etcd
 ETCDCTL_API=3 etcdctl --endpoints http://172.18.0.3:2379 del "" --from-key=true
+
+### and more useful stuff:
+# check dcm-up.sh
+
+docker start XX # start mongodb after reboot
+docker start YY # start etcd after reboot
+
