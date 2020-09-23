@@ -64,6 +64,28 @@ cat > config.json << EOF
 }
 EOF
 
+# rsync's config.json:
+pushd $k8s_path/src/rsync
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9031"
+}
+EOF
+
+# ncm's config.json:
+pushd $k8s_path/src/rsync
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9041"
+}
+EOF
+
 echo "Compiling source code"
 pushd $k8s_path/src/dcm/
 #generate_k8sconfig

@@ -16,7 +16,7 @@ jump_ip=10.10.110.24
 # set up connection
 ssh -fNT -L 2200:$dev_ip:22 root@$jump_ip
 
-# ssh config:
+# (one-time) ssh config:
 cat >> ~/.ssh/config << EOF
 Host vagrant2
 HostName 127.0.0.1
@@ -29,10 +29,10 @@ EOF
 
 # orchestrator
 ssh -fNT -L 9015:$dev_ip:9015 root@$jump_ip
-# ncm
-ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip
 # rsync
-ssh -fNT -L 9017:$dev_ip:9017 root@$jump_ip
+ssh -fNT -L 9017:$dev_ip:9031 root@$jump_ip
+# ncm
+ssh -fNT -L 9031:$dev_ip:9041 root@$jump_ip
 # ovnaction
 ssh -fNT -L 9051:$dev_ip:9051 root@$jump_ip
 # clm
