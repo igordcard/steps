@@ -37,6 +37,7 @@ volumes:
 EOF
 docker-compose up -d etcd
 export ETCD_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=etcd"))
+export DATABASE_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=mongo"))
 
 # prep config for dcm via orchestrator config.go
 pushd $k8s_path/src/orchestrator/pkg/infra/config
@@ -64,6 +65,17 @@ cat > config.json << EOF
 }
 EOF
 
+# clm's config.clm:
+pushd $k8s_path/src/clm
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9061"
+}
+EOF
+
 # rsync's config.json:
 pushd $k8s_path/src/rsync
 cat > config.json << EOF
@@ -76,7 +88,7 @@ cat > config.json << EOF
 EOF
 
 # ncm's config.json:
-pushd $k8s_path/src/rsync
+pushd $k8s_path/src/ncm
 cat > config.json << EOF
 {
     "database-type": "mongo",
