@@ -17,3 +17,6 @@ docker image rm igordcard/monitor:latest
 docker image rm ewmduck/monitor:latest
 docker image rm emcov2/monitor:latest
 kubectl apply -f deploy/operator.yaml
+
+# to run monitor for the 1st time in a cluster, this is necessary:
+./deploy/monitor-deploy.sh

@@ -15,6 +15,9 @@ cd $WORKDIR/src/ovnaction && make all
 cd $WORKDIR/src/clm && make all
 cd $WORKDIR/src/dcm && make all
 
+export ETCD_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=etcd"))
+export DATABASE_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=mongo"))
+
 cat > $WORKDIR/src/orchestrator/config.json << EOF
 {
     "database-type": "mongo",
@@ -28,7 +31,7 @@ cat > $WORKDIR/src/ncm/config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9031"
+    "service-port": "9041"
 }
 EOF
 cat > $WORKDIR/src/rsync/config.json << EOF
@@ -36,7 +39,7 @@ cat > $WORKDIR/src/rsync/config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9017"
+    "service-port": "9031"
 }
 EOF
 cat > $WORKDIR/src/ovnaction/config.json << EOF
