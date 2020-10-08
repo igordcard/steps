@@ -60,18 +60,10 @@ cat > $WORKDIR/src/clm/config.json << EOF
 EOF
 cat > $WORKDIR/src/dcm/config.json << EOF
 {
-    "database-ip": "$DATABASE_IP",
     "database-type": "mongo",
-    "plugin-dir": "plugins",
+    "database-ip": "$DATABASE_IP",
     "service-port": "9077",
-    "ca-file": "ca.cert",
-    "server-cert": "server.cert",
-    "server-key": "server.key",
-    "password": "",
-    "etcd-ip": "$ETCD_IP",
-    "etcd-cert": "",
-    "etcd-key": "",
-    "etcd-ca-file": ""
+    "etcd-ip": "$ETCD_IP"
 }
 EOF
 
