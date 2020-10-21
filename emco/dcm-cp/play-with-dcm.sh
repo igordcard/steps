@@ -6,7 +6,7 @@ cd ~/multicloud-k8s/src/orchestrator
 cat > create-project.json << EOF
 {"metadata": {"name": "test-project"}}
 EOF
-curl --header "Content-Type: application/json" --request POST --data @create-project.json http://127.0.0.1:9077/v2/projects
+curl --header "Content-Type: application/json" --request POST --data @create-project.json http://127.0.0.1:9015/v2/projects
 
 # Test DCM API
 cd ~/multicloud-k8s/src/dcm
