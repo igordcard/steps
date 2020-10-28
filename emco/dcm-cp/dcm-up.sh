@@ -66,7 +66,7 @@ cat > config.json << EOF
     "etcd-key": "",
     "etcd-ca-file": "",
     "service-port": "9015",
-    "log-level": "warn"
+    "log-level": "trace"
 }
 EOF
 
@@ -78,7 +78,8 @@ cat > config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9061"
+    "service-port": "9061",
+    "log-level": "trace"
 }
 EOF
 
@@ -90,7 +91,8 @@ cat > config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9031"
+    "service-port": "9031",
+    "log-level": "trace"
 }
 EOF
 
@@ -102,7 +104,8 @@ cat > config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9041"
+    "service-port": "9041",
+    "log-level": "trace"
 }
 EOF
 
@@ -123,7 +126,8 @@ cat > config.json << EOF
     "etcd-ip": "$ETCD_IP",
     "etcd-cert": "",
     "etcd-key": "",
-    "etcd-ca-file": ""
+    "etcd-ca-file": "",
+    "log-level": "trace"
 }
 EOF
 
@@ -135,7 +139,8 @@ cat > config.json << EOF
     "database-type": "mongo",
     "database-ip": "$DATABASE_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9051"
+    "service-port": "9051",
+    "log-level": "trace"
 }
 EOF
 

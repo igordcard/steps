@@ -18,54 +18,7 @@ cd $WORKDIR/src/dcm && make all
 export ETCD_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=etcd"))
 export DATABASE_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=mongo"))
 
-cat > $WORKDIR/src/orchestrator/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "etcd-ip": "$ETCD_IP",
-    "service-port": "9015"
-}
-EOF
-cat > $WORKDIR/src/ncm/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "etcd-ip": "$ETCD_IP",
-    "service-port": "9041"
-}
-EOF
-cat > $WORKDIR/src/rsync/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "etcd-ip": "$ETCD_IP",
-    "service-port": "9031"
-}
-EOF
-cat > $WORKDIR/src/ovnaction/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "etcd-ip": "$ETCD_IP",
-    "service-port": "9051"
-}
-EOF
-cat > $WORKDIR/src/clm/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "etcd-ip": "$ETCD_IP",
-    "service-port": "9061"
-}
-EOF
-cat > $WORKDIR/src/dcm/config.json << EOF
-{
-    "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
-    "service-port": "9077",
-    "etcd-ip": "$ETCD_IP"
-}
-EOF
+# see dcm-up.sh for how to prepare the services' config.jsons
 
 # easily bring up emco for dev
 sed -i '/emco/d' ~/.bashrc
