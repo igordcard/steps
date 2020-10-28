@@ -46,7 +46,8 @@ sed -i "s/EtcdIP:                 \"127.0.0.1\"/EtcdIP:                 \"$ETCD_
 popd
 
 # orchestrator's config.json:
-pushd $k8s_path/src/orchestrator
+mkdir -p $k8s_path/bin/orchestrator
+pushd $k8s_path/bin/orchestrator
 cat > config.json << EOF
 {
     "ca-file": "ca.cert",
@@ -66,7 +67,8 @@ cat > config.json << EOF
 EOF
 
 # clm's config.clm:
-pushd $k8s_path/src/clm
+mkdir -p $k8s_path/bin/clm
+pushd $k8s_path/bin/clm
 cat > config.json << EOF
 {
     "database-type": "mongo",
@@ -77,7 +79,8 @@ cat > config.json << EOF
 EOF
 
 # rsync's config.json:
-pushd $k8s_path/src/rsync
+mkdir -p $k8s_path/bin/rsync
+pushd $k8s_path/bin/rsync
 cat > config.json << EOF
 {
     "database-type": "mongo",
@@ -88,7 +91,8 @@ cat > config.json << EOF
 EOF
 
 # ncm's config.json:
-pushd $k8s_path/src/ncm
+mkdir -p $k8s_path/bin/ncm
+pushd $k8s_path/bin/ncm
 cat > config.json << EOF
 {
     "database-type": "mongo",
@@ -99,7 +103,8 @@ cat > config.json << EOF
 EOF
 
 echo "Compiling source code"
-pushd $k8s_path/src/dcm/
+mkdir -p $k8s_path/bin/dcm
+pushd $k8s_path/bin/dcm
 #generate_k8sconfig
 cat > config.json << EOF
 {
@@ -117,6 +122,19 @@ cat > config.json << EOF
     "etcd-ca-file": ""
 }
 EOF
+
+# ovnaction's config.json:
+mkdir -p $k8s_path/bin/ovnaction
+pushd $k8s_path/bin/ovnaction
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9051"
+}
+EOF
+
 source ~/.profile
 make all
 ./dcm
