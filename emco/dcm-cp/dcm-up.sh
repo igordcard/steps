@@ -45,6 +45,10 @@ sed -i "s/DatabaseIP:             \"127.0.0.1\"/DatabaseIP:             \"$DATAB
 sed -i "s/EtcdIP:                 \"127.0.0.1\"/EtcdIP:                 \"$ETCD_IP\"/" config.go
 popd
 
+# compile all services
+cd $k8s_path
+make compile-container
+
 # orchestrator's config.json:
 mkdir -p $k8s_path/bin/orchestrator
 pushd $k8s_path/bin/orchestrator
