@@ -14,7 +14,10 @@ source _functions.sh
 # Start k8splugin from compiled binaries to foreground. This is usable for development use.
 #
 source /etc/environment
+
+pushd ~/EMCO
 k8s_path="$(git rev-parse --show-toplevel)"
+popd
 
 apt-get install -y docker-compose build-essential
 
