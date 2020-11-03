@@ -4,6 +4,7 @@
 # in developing the features for 20.12
 
 orchestrator=http://localhost:9015/v2
+emcoroot=~/EMCO
 
 # create a project compatible with emco.sh
 projectname="Sanity-Test-Project"
@@ -41,3 +42,8 @@ curl -X GET "${orchestrator}/projects/${projectname}/composite-apps/CollectionCo
 
 # delete the generic placement intent
 curl -X DELETE "${orchestrator}/projects/${projectname}/composite-apps/CollectionCompositeApp/v1/deployment-intent-groups/collection_deployment_intent_group/generic-placement-intents/${generic_placement_intent_name}"
+
+# instantiate vs. terminate
+cd $emcoroot/kud/tests
+./emco.sh instantiate
+./emco.sh terminate
