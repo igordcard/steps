@@ -146,6 +146,12 @@ cat > config.json << EOF
     "log-level": "trace"
 }
 EOF
+popd
+popd
+popd
+popd
+popd
+popd
 
 source ~/.profile
 make all

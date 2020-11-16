@@ -15,6 +15,7 @@ jump_ip=10.10.110.24
 
 # set up connection
 ssh -fNT -L 2200:$dev_ip:22 root@$jump_ip
+#sshvagrant2
 
 # (one-time) ssh config:
 cat >> ~/.ssh/config << EOF
@@ -35,6 +36,8 @@ ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip
 ssh -fNT -L 9041:$dev_ip:9041 root@$jump_ip
 # ovnaction
 ssh -fNT -L 9051:$dev_ip:9051 root@$jump_ip
+# ovnaction (grpc)
+ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip
 # clm
 ssh -fNT -L 9061:$dev_ip:9061 root@$jump_ip
 # dcm
