@@ -3,9 +3,8 @@
 # run as root
 
 MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
-MK8S_DIR=~/multicloud-k8s
-
 git clone $MK8S_REMOTE
+MK8S_DIR=~/multicloud-k8s
 
 apt-get install vagrant -y
 $MK8S_DIR/kud/hosting_providers/vagrant/setup.sh -p libvirt
@@ -67,9 +66,9 @@ ssh root@$VAGRANT_IP_ADDR1
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
 MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
+git clone $MK8S_REMOTE
 MK8S_DIR=~/multicloud-k8s
 
-git clone $MK8S_REMOTE
 cd $MK8S_DIR
 
 # install kubernetes/docker using KUD AIO (global cluster):
@@ -94,6 +93,7 @@ exit
 # repeat the above but for:
 ssh root@$VAGRANT_IP_ADDR2
 # SEE(INSIDE-VAGRANT)
+
 
 # ===========================
 # back out to the main host
@@ -137,3 +137,166 @@ sed -i '/MONGO_IP/d' ~/.bashrc
 echo "export MONGO_IP=$MONGO_IP" >> ~/.bashrc
 sed -i '/ETCD_IP/d' ~/.bashrc
 echo "export ETCD_IP=$ETCD_IP" >> ~/.bashrc
+
+
+# ===========================
+# install Go
+# REF(INSTALL-GO)
+cd
+export GO_VERSION="1.14.12"
+curl -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz
+tar -xvf go$GO_VERSION.linux-amd64.tar.gz
+sudo mv go /usr/local
+cat >> ~/.profile <<\EOF
+export GOPATH=$HOME/work
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+EOF
+source ~/.profile
+
+
+# ===========================
+# compile and configure the EMCO services
+# REF(CONFIGURE-EMCO)
+
+EMCO_REMOTE="https://github.com/onap/multicloud-k8s.git"
+git clone $EMCO_REMOTE
+EMCO_DIR=~/multicloud-k8s
+
+# compile all services
+cd $EMCO_DIR
+make compile-container
+
+# orchestrator's config.json:
+mkdir -p $EMCO_DIR/bin/orchestrator
+cd $EMCO_DIR/bin/orchestrator
+cat > config.json << EOF
+{
+    "ca-file": "ca.cert",
+    "server-cert": "server.cert",
+    "server-key": "server.key",
+    "password": "",
+    "database-ip": "$DATABASE_IP",
+    "database-type": "mongo",
+    "plugin-dir": "plugins",
+    "etcd-ip": "$ETCD_IP",
+    "etcd-cert": "",
+    "etcd-key": "",
+    "etcd-ca-file": "",
+    "service-port": "9015",
+    "log-level": "trace"
+}
+EOF
+
+# clm's config.clm:
+mkdir -p $EMCO_DIR/bin/clm
+cd $EMCO_DIR/bin/clm
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9061",
+    "log-level": "trace"
+}
+EOF
+
+# rsync's config.json:
+mkdir -p $EMCO_DIR/bin/rsync
+cd $EMCO_DIR/bin/rsync
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9031",
+    "log-level": "trace"
+}
+EOF
+
+# ncm's config.json:
+mkdir -p $EMCO_DIR/bin/ncm
+cd $EMCO_DIR/bin/ncm
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9041",
+    "log-level": "trace"
+}
+EOF
+
+mkdir -p $EMCO_DIR/bin/dcm
+cd $EMCO_DIR/bin/dcm
+#generate_k8sconfig
+cat > config.json << EOF
+{
+    "database-ip": "$DATABASE_IP",
+    "database-type": "mongo",
+    "plugin-dir": "plugins",
+    "service-port": "9077",
+    "ca-file": "ca.cert",
+    "server-cert": "server.cert",
+    "server-key": "server.key",
+    "password": "",
+    "etcd-ip": "$ETCD_IP",
+    "etcd-cert": "",
+    "etcd-key": "",
+    "etcd-ca-file": "",
+    "log-level": "trace"
+}
+EOF
+
+# ovnaction's config.json:
+mkdir -p $EMCO_DIR/bin/ovnaction
+cd $EMCO_DIR/bin/ovnaction
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$DATABASE_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9051",
+    "log-level": "trace"
+}
+EOF
+
+
+# ===========================
+# the monitor service also needs to be running on each cluster
+# commands simplified, some may be missing
+# REF(DEPLOY-MONITOR)
+ssh root@$VAGRANT_IP_ADDR1
+git clone $EMCO_REMOTE
+cd $EMCO_DIR/src/monitor/deploy
+./monitor-deploy.sh
+
+
+# ===========================
+# run the EMCO services in tmux
+# REF(RUN-EMCO)
+
+tmux
+# do the following in separate windows
+EMCO_DIR=~/multicloud-k8s
+cd $EMCO_DIR/bin/clm
+./clm >> log.txt 2>&1
+cd $EMCO_DIR/bin/dcm
+./dcm >> log.txt 2>&1
+cd $EMCO_DIR/bin/ncm
+./ncm >> log.txt 2>&1
+cd $EMCO_DIR/bin/orchestrator
+./orchestrator >> log.txt 2>&1
+cd $EMCO_DIR/bin/ovnaction
+./ovnaction >> log.txt 2>&1
+cd $EMCO_DIR/bin/rsync
+./rsync >> log.txt 2>&1
+
+
+# ===========================
+# some useful commands while developing
+# REF(DEV-EMCO)
+
+cd $EMCO_DIR/src/dcm
+go mod vendor && make
+cd $EMCO_DIR/src/dcm
+./dcm >> log.txt 2>&1
