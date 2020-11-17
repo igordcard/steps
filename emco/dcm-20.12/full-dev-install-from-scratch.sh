@@ -77,7 +77,7 @@ sed -i 's/^localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
 
 # >> disable addons:
 vim kud/hosting_providers/vagrant/installer.sh
-# comment the following lines:
+# comment the following lines near the end of the file:
 
 #install_addons
 #if ${KUD_PLUGIN_ENABLED:-false}; then
@@ -97,5 +97,43 @@ ssh root@$VAGRANT_IP_ADDR2
 
 # ===========================
 # back out to the main host
-# REF(INSTALL-EMCO)
+# REF(INSTALL-EMCO-DEPS)
 
+apt-get install -y docker-compose build-essential
+
+source $MK8S_DIR/deployments/_functions.sh
+cd $MK8S_DIR/deployments
+
+# install MongoDB
+stop_all
+start_mongo
+
+cd
+
+# install etcd
+cat >> docker-compose.yml << \EOF
+version: '2'
+services:
+  etcd:
+    image: bitnami/etcd:3
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - HTTP_PROXY=${HTTP_PROXY}
+      - HTTPS_PROXY=${HTTPS_PROXY}
+      - NO_PROXY=${NO_PROXY}
+    volumes:
+      - etcd_data:/bitnami/etcd
+volumes:
+  etcd_data:
+    driver: local
+EOF
+docker-compose up -d etcd
+
+export MONGO_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=mongo"))
+export ETCD_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aqf "name=etcd"))
+
+# as an extra add the vars to bashrc so they're always in the env
+sed -i '/MONGO_IP/d' ~/.bashrc
+echo "export MONGO_IP=$MONGO_IP" >> ~/.bashrc
+sed -i '/ETCD_IP/d' ~/.bashrc
+echo "export ETCD_IP=$ETCD_IP" >> ~/.bashrc
