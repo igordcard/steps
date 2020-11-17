@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# not meant as a script, meant as a copypad
 # run as root
 
 MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
@@ -144,6 +145,7 @@ echo "export ETCD_IP=$ETCD_IP" >> ~/.bashrc
 # REF(INSTALL-GO)
 cd
 export GO_VERSION="1.14.12"
+#export GO_VERSION="1.15.5"
 curl -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz
 tar -xvf go$GO_VERSION.linux-amd64.tar.gz
 sudo mv go /usr/local
@@ -300,3 +302,31 @@ cd $EMCO_DIR/src/dcm
 go mod vendor && make
 cd $EMCO_DIR/src/dcm
 ./dcm >> log.txt 2>&1
+
+
+# ===========================
+# forward ports locally to make API interaction easy
+# REF(LOCAL-FORWARD)
+
+dev_ip=127.0.0.1
+jump_ip=192.168.1.100
+jump_port=22
+
+# these are just functions that set specific IP addresses to the vars above:
+set_internet_vars
+set_intranet_vars
+
+# orchestrator
+ssh -fNT -L 9015:$dev_ip:9015 root@$jump_ip -p $jump_port
+# rsync
+ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip -p $jump_port
+# ncm
+ssh -fNT -L 9041:$dev_ip:9041 root@$jump_ip -p $jump_port
+# ovnaction
+ssh -fNT -L 9051:$dev_ip:9051 root@$jump_ip -p $jump_port
+# ovnaction (grpc)
+ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port
+# clm
+ssh -fNT -L 9061:$dev_ip:9061 root@$jump_ip -p $jump_port
+# dcm
+ssh -fNT -L 9077:$dev_ip:9077 root@$jump_ip -p $jump_port
