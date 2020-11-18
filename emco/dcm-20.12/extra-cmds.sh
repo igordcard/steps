@@ -6,10 +6,13 @@ ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 get --prefix /context/ --
 # Show appcontext status:
 ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 get --prefix /context/ | tail
 
+# Get particular appcontext path:
+ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 get /context/7892661236820160162/app/logical-cloud/cluster/cp+c1/
+
 # Show MongoDB store collections:
-mongo $MONGO_IP/mco --eval 'db.orchestrator.find()'
 mongo $MONGO_IP/mco --eval 'db.cluster.find()'
 mongo $MONGO_IP/mco --eval 'db.cloudconfig.find()'
+mongo $MONGO_IP/mco --eval 'db.orchestrator.find()'
 
 # Delete specific MongoDB document by ID:
 mongo $MONGO_IP/mco --eval 'db.cloudconfig.remove({"_id" : ObjectId("5fb42624bbc56bb17e02b5d7")})'

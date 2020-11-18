@@ -3,24 +3,7 @@
 # just some helper commands to aid
 # in developing the features for 20.12
 
-orchestrator=http://localhost:9015/v2
-clm=http://localhost:9061/v2
-emcoroot=~/EMCO
-
-# create a project compatible with emco.sh
-projectname="test-project"
-projectdata="$(cat<<EOF
-{
-  "metadata": {
-    "name": "$projectname",
-    "description": "description of $projectname controller",
-    "userData1": "$projectname user data 1",
-    "userData2": "$projectname user data 2"
-  }
-}
-EOF
-)"
-curl -X POST "$orchestrator/projects" -d "$projectdata"
+source essential-resources.sh
 
 # create my two DCM clusters compatible with dcm_call_api.sh but not with emco.sh
 cpdata="$(cat<<EOF

@@ -1,11 +1,12 @@
 #!/bin/bash
-orchestrator=http://localhost:9015/v2
-clm=http://localhost:9061/v2
-emcoroot=~/EMCO
+
+source essential-resources.sh
 
 # modify plugin_fw_v2.sh to match dev env
 
 # instantiate vs. terminate
+
+# do once:
 cd $emcoroot/kud/tests
 ./plugin_fw_v2.sh setup
 ./plugin_fw_v2.sh create
