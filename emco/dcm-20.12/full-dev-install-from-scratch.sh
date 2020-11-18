@@ -100,7 +100,7 @@ ssh root@$VAGRANT_IP_ADDR2
 # back out to the main host
 # REF(INSTALL-EMCO-DEPS)
 
-apt-get install -y docker-compose build-essential
+apt-get install -y docker-compose mongodb-clients etcd-client build-essential
 
 source $MK8S_DIR/deployments/_functions.sh
 cd $MK8S_DIR/deployments
@@ -303,6 +303,8 @@ go mod vendor && make
 cd $EMCO_DIR/src/dcm
 ./dcm >> log.txt 2>&1
 
+# see emco-helpers.sh for additional useful commands, including creating an EMCO project
+# see extra-cmds.sh for other debugging commands
 
 # ===========================
 # forward ports locally to make API interaction easy
@@ -330,3 +332,6 @@ ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port
 ssh -fNT -L 9061:$dev_ip:9061 root@$jump_ip -p $jump_port
 # dcm
 ssh -fNT -L 9077:$dev_ip:9077 root@$jump_ip -p $jump_port
+
+# just a functions that forwards all services from above:
+forward_all

@@ -8,7 +8,7 @@ clm=http://localhost:9061/v2
 emcoroot=~/EMCO
 
 # create a project compatible with emco.sh
-projectname="Sanity-Test-Project"
+projectname="test-project"
 projectdata="$(cat<<EOF
 {
   "metadata": {

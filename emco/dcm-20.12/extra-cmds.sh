@@ -6,11 +6,22 @@ ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 get --prefix /context/ --
 # Show appcontext status:
 ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 get --prefix /context/ | tail
 
-# Show MongoDB orchestrator store contents:
-mongo $DATABASE_IP/mco --eval 'db.orchestrator.find()'
+# Show MongoDB store collections:
+mongo $MONGO_IP/mco --eval 'db.orchestrator.find()'
+mongo $MONGO_IP/mco --eval 'db.cluster.find()'
+mongo $MONGO_IP/mco --eval 'db.cloudconfig.find()'
+
+# Delete specific MongoDB document by ID:
+mongo $MONGO_IP/mco --eval 'db.cloudconfig.remove({"_id" : ObjectId("5fb42624bbc56bb17e02b5d7")})'
+
+# Update specific MongoDB document by ID:
+mongo $MONGO_IP/mco --eval 'db.orchestrator.update({"_id" : ObjectId("5fb4228dbbc56bb17e02b392")}, { "_id" : ObjectId("5fb4228dbbc56bb17e02b392"), "project" : "test-project", "key" : "{project,}", "projectmetadata" : { "metadata" : { "name" : "test-project", "description" : "description of test-project project", "userdata1" : "test-project user data 1", "userdata2" : "test-project user data 2" } } })'
 
 # Wipe out etcd, just in case:
 ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 del "" --from-key=true
+
+# Delete every key under the specified level:
+ETCDCTL_API=3 etcdctl --endpoints http://$ETCD_IP:2379 del --prefix /context/
 
 # Show that kubeconfig works:
 kubectl get secrets -A
@@ -19,6 +30,3 @@ kubectl config current-context
 kubectl config view
 kubectl get secrets -A
 kubectl get secrets -n ns1
-
-# Sequence diagram for CSR approval:
-# https://wiki.onap.org/display/DW/Obtaining+signed+certificate
