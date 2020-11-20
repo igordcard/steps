@@ -303,6 +303,11 @@ go mod vendor && make
 cd $EMCO_DIR/src/dcm
 ./dcm >> log.txt 2>&1
 
+# generating protobuf files for Go
+apt-get install protobuf-compiler
+apt-get install golang-goprotobuf-dev
+protoc --go_out=. cloudready.proto
+
 # see emco-helpers.sh for additional useful commands, including creating an EMCO project
 # see extra-cmds.sh for other debugging commands
 
