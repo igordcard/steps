@@ -177,7 +177,7 @@ cat > config.json << EOF
     "server-cert": "server.cert",
     "server-key": "server.key",
     "password": "",
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "database-type": "mongo",
     "plugin-dir": "plugins",
     "etcd-ip": "$ETCD_IP",
@@ -195,7 +195,7 @@ cd $EMCO_DIR/bin/clm
 cat > config.json << EOF
 {
     "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "etcd-ip": "$ETCD_IP",
     "service-port": "9061",
     "log-level": "trace"
@@ -208,7 +208,7 @@ cd $EMCO_DIR/bin/rsync
 cat > config.json << EOF
 {
     "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "etcd-ip": "$ETCD_IP",
     "service-port": "9031",
     "log-level": "trace"
@@ -221,7 +221,7 @@ cd $EMCO_DIR/bin/ncm
 cat > config.json << EOF
 {
     "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "etcd-ip": "$ETCD_IP",
     "service-port": "9041",
     "log-level": "trace"
@@ -233,7 +233,7 @@ cd $EMCO_DIR/bin/dcm
 #generate_k8sconfig
 cat > config.json << EOF
 {
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "database-type": "mongo",
     "plugin-dir": "plugins",
     "service-port": "9077",
@@ -255,7 +255,7 @@ cd $EMCO_DIR/bin/ovnaction
 cat > config.json << EOF
 {
     "database-type": "mongo",
-    "database-ip": "$DATABASE_IP",
+    "database-ip": "$MONGO_IP",
     "etcd-ip": "$ETCD_IP",
     "service-port": "9051",
     "log-level": "trace"
@@ -298,10 +298,46 @@ cd $EMCO_DIR/bin/rsync
 # some useful commands while developing
 # REF(DEV-EMCO)
 
-cd $EMCO_DIR/src/dcm
+# compile all services
+EMCO_DIR=~/EMCO
+cd $EMCO_DIR/src/orchestrator
+go mod vendor && make
+cd $EMCO_DIR/src/rsync
+go mod vendor && make
+cd $EMCO_DIR/src/clm
 go mod vendor && make
 cd $EMCO_DIR/src/dcm
-./dcm >> log.txt 2>&1
+go mod vendor && make
+cd $EMCO_DIR/src/ncm
+go mod vendor && make
+cd $EMCO_DIR/src/ovnaction
+go mod vendor && make
+cd $EMCO_DIR/src/monitor
+go mod vendor && make
+cd $EMCO_DIR
+
+cd $EMCO_DIR/src
+git add clm/
+git add dcm/
+git add dtc/
+git add monitor/
+git add ncm/
+git add orchestrator
+git add ovnaction/
+git add rsync/
+
+# restoring all go.mods to a particular version
+cd $EMCO_DIR/src
+rm */go.sum
+commit_id=COMMIT_ID
+git checkout $commit_id -- clm/go.mod
+git checkout $commit_id -- dcm/go.mod
+git checkout $commit_id -- dtc/go.mod
+git checkout $commit_id -- monitor/go.mod
+git checkout $commit_id -- ncm/go.mod
+git checkout $commit_id -- orchestrator/go.mod
+git checkout $commit_id -- ovnaction/go.mod
+git checkout $commit_id -- rsync/go.mod
 
 # generating protobuf files for Go
 apt-get install protobuf-compiler
