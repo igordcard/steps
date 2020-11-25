@@ -104,3 +104,6 @@ curl -X DELETE "${orchestrator}/projects/${projectname}/composite-apps/Collectio
 cd $emcoroot/kud/tests
 ./emco.sh instantiate
 ./emco.sh terminate
+
+# manually trigger cloudconfig creation until the grpc method is enabled:
+curl -X GET http://localhost:9077/v2/projects/test-project/logical-clouds/lc1/cluster-references/lc1-c1/kubeconfig

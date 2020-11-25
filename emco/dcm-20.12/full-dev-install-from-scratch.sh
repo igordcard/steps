@@ -316,15 +316,8 @@ cd $EMCO_DIR/src/monitor
 go mod vendor && make
 cd $EMCO_DIR
 
-cd $EMCO_DIR/src
-git add clm/
-git add dcm/
-git add dtc/
-git add monitor/
-git add ncm/
-git add orchestrator
-git add ovnaction/
-git add rsync/
+# git add all source
+git add $EMCO_DIR/src
 
 # restoring all go.mods to a particular version
 cd $EMCO_DIR/src
@@ -362,13 +355,13 @@ set_intranet_vars
 # orchestrator
 ssh -fNT -L 9015:$dev_ip:9015 root@$jump_ip -p $jump_port
 # rsync
-ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip -p $jump_port
+ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip -p $jump_port #grpc
 # ncm
-ssh -fNT -L 9041:$dev_ip:9041 root@$jump_ip -p $jump_port
+ssh -fNT -L 9081:$dev_ip:9081 root@$jump_ip -p $jump_port
 # ovnaction
 ssh -fNT -L 9051:$dev_ip:9051 root@$jump_ip -p $jump_port
 # ovnaction (grpc)
-ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port
+ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port #grpc
 # clm
 ssh -fNT -L 9061:$dev_ip:9061 root@$jump_ip -p $jump_port
 # dcm
