@@ -161,8 +161,8 @@ source ~/.profile
 # REF(CONFIGURE-EMCO)
 
 EMCO_REMOTE="https://github.com/onap/multicloud-k8s.git"
-git clone $EMCO_REMOTE
-EMCO_DIR=~/multicloud-k8s
+EMCO_DIR=~/EMCO
+git clone $EMCO_REMOTE $EMCO_DIR
 
 # compile all services
 cd $EMCO_DIR
@@ -223,7 +223,7 @@ cat > config.json << EOF
     "database-type": "mongo",
     "database-ip": "$MONGO_IP",
     "etcd-ip": "$ETCD_IP",
-    "service-port": "9041",
+    "service-port": "9081",
     "log-level": "trace"
 }
 EOF
