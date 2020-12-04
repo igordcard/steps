@@ -7,6 +7,10 @@ MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
 git clone $MK8S_REMOTE
 MK8S_DIR=~/multicloud-k8s
 
+# recommendation, add the following to .bashrc:
+export MK8S_DIR=~/multicloud-k8s
+export EMCO_DIR=~/EMCO
+
 apt-get install vagrant -y
 $MK8S_DIR/kud/hosting_providers/vagrant/setup.sh -p libvirt
 
@@ -278,18 +282,29 @@ cd $EMCO_DIR/src/monitor/deploy
 # REF(RUN-EMCO)
 
 tmux
+
 # do the following in separate windows
-EMCO_DIR=~/multicloud-k8s
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/clm
 ./clm >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/dcm
 ./dcm >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/ncm
 ./ncm >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/orchestrator
 ./orchestrator >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/ovnaction
 ./ovnaction >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/rsync
 ./rsync >> log.txt 2>&1
 
@@ -337,6 +352,12 @@ apt-get install protobuf-compiler
 apt-get install golang-goprotobuf-dev
 protoc --go_out=. cloudready.proto
 
+# emcoctl testing commands
+$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml apply
+$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml apply
+$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml delete
+$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml delete
+
 # see emco-helpers.sh for additional useful commands, including creating an EMCO project
 # see extra-cmds.sh for other debugging commands
 
@@ -349,8 +370,8 @@ jump_ip=192.168.1.100
 jump_port=22
 
 # these are just functions that set specific IP addresses to the vars above:
-set_internet_vars
-set_intranet_vars
+internet_vars
+intranet_vars
 
 # orchestrator
 ssh -fNT -L 9015:$dev_ip:9015 root@$jump_ip -p $jump_port
