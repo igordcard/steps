@@ -266,6 +266,32 @@ cat > config.json << EOF
 }
 EOF
 
+# dtc's config.json:
+mkdir -p $EMCO_DIR/bin/dtc
+cd $EMCO_DIR/bin/dtc
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$MONGO_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9018",
+    "log-level": "trace"
+}
+EOF
+
+# genericactioncontroller's config.json:
+mkdir -p $EMCO_DIR/bin/genericactioncontroller
+cd $EMCO_DIR/bin/genericactioncontroller
+cat > config.json << EOF
+{
+    "database-type": "mongo",
+    "database-ip": "$MONGO_IP",
+    "etcd-ip": "$ETCD_IP",
+    "service-port": "9020",
+    "log-level": "trace"
+}
+EOF
+
 
 # ===========================
 # the monitor service also needs to be running on each cluster
@@ -307,6 +333,14 @@ cd $EMCO_DIR/bin/ovnaction
 EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/rsync
 ./rsync >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
+cd $EMCO_DIR/bin/dtc
+./dtc >> log.txt 2>&1
+
+EMCO_DIR=~/EMCO
+cd $EMCO_DIR/bin/genericactioncontroller
+./genericactioncontroller >> log.txt 2>&1
 
 
 # ===========================
@@ -388,5 +422,8 @@ ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port #grpc
 # rsync (grpc)
 ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip -p $jump_port #grpc
 
-# just a functions that forwards all services from above:
+# mongodb
+ssh -fNT -L 27017:172.19.0.2:27017 root@$jump_ip -p $jump_port #mongo
+
+# just a function that forwards all services from above:
 forward_all
