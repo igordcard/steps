@@ -58,7 +58,34 @@ echo "export VAGRANT_IP_ADDR2=$VAGRANT_IP_ADDR2" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
 ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 
+# prepare the 3rd vagrant VM cluster:
+cd $MK8S_DIR/kud/hosting_providers/containerized/cluster03
+sed -i "s/\"ubuntu18\"/\"cluster03\"/" Vagrantfile
+sed -i "s/memory = 32768/memory = 8192/" Vagrantfile
+sed -i "s/cpus = 16/cpus = 2/" Vagrantfile
+sed -i "s/size = 400/size = 20/" Vagrantfile
+vagrant up
+
+export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+sed -i '/VAGRANT_IP_ADDR2/d' ~/.bashrc
+echo "export VAGRANT_IP_ADDR2=$VAGRANT_IP_ADDR2" >> ~/.bashrc
+
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
+ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+
+
 # SEE(INSIDE-VAGRANT)
+
+#####
+
+# bring back deployment after rebooting
+
+cd $MK8S_DIR/kud/hosting_providers/containerized/cluster01
+vagrant up
+cd $MK8S_DIR/kud/hosting_providers/containerized/cluster02
+vagrant up
+cd $MK8S_DIR/kud/hosting_providers/containerized/cluster03
+vagrant up
 
 #####
 
