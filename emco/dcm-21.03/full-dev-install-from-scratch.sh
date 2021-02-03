@@ -462,6 +462,14 @@ scp root@$VAGRANT_IP_ADDR1:.kube/config ~/c01.config
 scp root@$VAGRANT_IP_ADDR2:.kube/config ~/c02.config
 scp root@$VAGRANT_IP_ADDR3:.kube/config ~/c03.config
 
+# prepare tarballs necessary by example DIGs (/opt/csar stuff)
+mkdir -p /opt/csar
+cd /opt/csar
+tar -czf collectd.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collection/app1/helm .
+tar -czf collectd_profile.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collection/app1/profile .
+tar -czf prometheus-operator.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collection/app2/helm .
+tar -czf prometheus-operator_profile.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collection/app2/profile .
+
 # emcoctl testing commands
 $EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml apply
 $EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml apply
