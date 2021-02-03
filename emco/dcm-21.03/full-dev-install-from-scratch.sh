@@ -6,7 +6,10 @@
 # for EMCO 21.03, i.e. for K8s 1.19 and latest KUD deployment files
 # also updated for Ubuntu 20.04 (20.12 script was for Ubuntu 18.04)
 
-MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
+mk8sgit="https://github.com/onap/multicloud-k8s.git"
+emcogit=""
+
+MK8S_REMOTE="$mk8sgit"
 git clone $MK8S_REMOTE
 MK8S_DIR=~/multicloud-k8s
 
@@ -66,12 +69,12 @@ sed -i "s/cpus = 16/cpus = 2/" Vagrantfile
 sed -i "s/size = 400/size = 20/" Vagrantfile
 vagrant up
 
-export VAGRANT_IP_ADDR2=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
-sed -i '/VAGRANT_IP_ADDR2/d' ~/.bashrc
-echo "export VAGRANT_IP_ADDR2=$VAGRANT_IP_ADDR2" >> ~/.bashrc
+export VAGRANT_IP_ADDR3=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+sed -i '/VAGRANT_IP_ADDR3/d' ~/.bashrc
+echo "export VAGRANT_IP_ADDR3=$VAGRANT_IP_ADDR3" >> ~/.bashrc
 
-ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR2
-ssh vagrant@$VAGRANT_IP_ADDR2 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$VAGRANT_IP_ADDR3
+ssh vagrant@$VAGRANT_IP_ADDR3 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 
 
 # SEE(INSIDE-VAGRANT)
@@ -105,12 +108,14 @@ ssh root@$VAGRANT_IP_ADDR1
 
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
-MK8S_REMOTE="https://github.com/onap/multicloud-k8s.git"
+MK8S_REMOTE="$mk8sgit"
 git clone $MK8S_REMOTE
 MK8S_DIR=~/multicloud-k8s
 cd $MK8S_DIR
 
-# install kubernetes/docker using KUD AIO (global cluster):
+# install kubernetes/docker using KUD AIO (global cluster)
+
+# fix hostnames to localhost:
 sed -i 's/^localhost/$HOSTNAME/' kud/hosting_providers/baremetal/aio.sh
 
 # >> disable addons:
@@ -182,11 +187,11 @@ echo "export ETCD_IP=$ETCD_IP" >> ~/.bashrc
 # install Go
 # REF(INSTALL-GO)
 cd
-export GO_VERSION="1.14.12"
-#export GO_VERSION="1.15.5"
+export GO_VERSION="1.14.14"
+#export GO_VERSION="1.15.7"
 curl -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz
 tar -xvf go$GO_VERSION.linux-amd64.tar.gz
-sudo mv go /usr/local
+mv go /usr/local
 cat >> ~/.profile <<\EOF
 export GOPATH=$HOME/work
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
@@ -198,9 +203,12 @@ source ~/.profile
 # compile and configure the EMCO services
 # REF(CONFIGURE-EMCO)
 
-EMCO_REMOTE="https://github.com/onap/multicloud-k8s.git"
+EMCO_REMOTE="$emcogit"
 EMCO_DIR=~/EMCO
 git clone $EMCO_REMOTE $EMCO_DIR
+
+# you'll need to setup the EMCO dependencies properly first:
+# SEE(INSTALL-EMCO-DEPS)
 
 # compile all services
 cd $EMCO_DIR
@@ -331,10 +339,17 @@ EOF
 # the monitor service also needs to be running on each cluster
 # commands simplified, some may be missing
 # REF(DEPLOY-MONITOR)
+
 ssh root@$VAGRANT_IP_ADDR1
-git clone $EMCO_REMOTE
-cd $EMCO_DIR/src/monitor/deploy
+
+# MK8S_REMOTE="$mk8sgit"
+MK8S_DIR=~/multicloud-k8s
+# git clone $MK8S_REMOTE $MK8S_DIR
+
+cd $MK8S_DIR/src/monitor/deploy
 ./monitor-deploy.sh
+
+# do the same for other clusters
 
 
 # ===========================
@@ -376,6 +391,26 @@ EMCO_DIR=~/EMCO
 cd $EMCO_DIR/bin/genericactioncontroller
 ./genericactioncontroller >> log.txt 2>&1
 
+# alternatively launch them all in the background and kill them later
+EMCO_DIR=~/EMCO
+cd $EMCO_DIR/bin/clm
+./clm >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/dcm
+./dcm >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/ncm
+./ncm >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/orchestrator
+./orchestrator >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/ovnaction
+./ovnaction >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/rsync
+./rsync >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/dtc
+./dtc >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/genericactioncontroller
+./genericactioncontroller >> log.txt 2>&1 &
+
+
 
 # ===========================
 # some useful commands while developing
@@ -384,19 +419,21 @@ cd $EMCO_DIR/bin/genericactioncontroller
 # compile all services
 EMCO_DIR=~/EMCO
 cd $EMCO_DIR/src/orchestrator
-go mod vendor && make
+make
 cd $EMCO_DIR/src/rsync
-go mod vendor && make
+make
 cd $EMCO_DIR/src/clm
-go mod vendor && make
+make
 cd $EMCO_DIR/src/dcm
-go mod vendor && make
+make
 cd $EMCO_DIR/src/ncm
-go mod vendor && make
+make
 cd $EMCO_DIR/src/ovnaction
-go mod vendor && make
+make
 cd $EMCO_DIR/src/monitor
-go mod vendor && make
+make
+cd $EMCO_DIR/src/tools/emcoctl
+make
 cd $EMCO_DIR
 
 # git add all source
@@ -419,6 +456,11 @@ git checkout $commit_id -- rsync/go.mod
 apt-get install protobuf-compiler
 apt-get install golang-goprotobuf-dev
 protoc --go_out=. cloudready.proto
+
+# prepare typical files needed by emcoctl
+scp root@$VAGRANT_IP_ADDR1:.kube/config ~/c01.config
+scp root@$VAGRANT_IP_ADDR2:.kube/config ~/c02.config
+scp root@$VAGRANT_IP_ADDR3:.kube/config ~/c03.config
 
 # emcoctl testing commands
 $EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml apply
