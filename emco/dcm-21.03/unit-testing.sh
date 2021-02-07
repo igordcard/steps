@@ -1,3 +1,14 @@
+# ===========================
+# Testing and Validation
+# REF(TESTING-VALIDATION)
+
+# install mockery for generating mocks
+apt-get install mockery
+
+# install ginkgo dependencies
+go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/gomega/...
+
 # initialize package's ginkgo
 ginkgo bootstrap
 
