@@ -182,6 +182,9 @@ echo "export MONGO_IP=$MONGO_IP" >> ~/.bashrc
 sed -i '/ETCD_IP/d' ~/.bashrc
 echo "export ETCD_IP=$ETCD_IP" >> ~/.bashrc
 
+# when rebooting the host, restart the docker containers:
+docker start deployments_mongo_1
+docker start root_etcd_1
 
 # ===========================
 # install Go

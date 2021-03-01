@@ -16,10 +16,20 @@ mongo --username $MONGO_IP/emco --password emco mco --eval 'db.cluster.remove({}
 mongo --username $MONGO_IP/emco --password emco mco --eval 'db.cloudconfig.remove({})'
 mongo --username $MONGO_IP/emco --password emco mco --eval 'db.controller.remove({})'
 
+# Delete everything in MongoDB without authentication:
+# MONGO_IP=localhost #optional
+mongo $MONGO_IP/mco --eval 'db.orchestrator.remove({})'
+mongo $MONGO_IP/mco --eval 'db.cluster.remove({})'
+mongo $MONGO_IP/mco --eval 'db.cloudconfig.remove({})'
+mongo $MONGO_IP/mco --eval 'db.controller.remove({})'
+
 # Show MongoDB store collections:
 mongo $MONGO_IP/mco --eval 'db.cluster.find()'
 mongo $MONGO_IP/mco --eval 'db.cloudconfig.find()'
 mongo $MONGO_IP/mco --eval 'db.orchestrator.find()'
+
+# Count how many documents in a collection:
+mongo $MONGO_IP/mco --eval 'db.cloudconfig.count()'
 
 # Delete specific MongoDB document by ID:
 mongo $MONGO_IP/mco --eval 'db.orchestrator.remove({"_id" : ObjectId("5fb42624bbc56bb17e02b5d7")})'
