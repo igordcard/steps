@@ -19,6 +19,10 @@ ginkgo generate apply # apply is the name
 go test -cover
 ginkgo -cover
 
+# generate coverage html:
+go test -coverprofile=coverage.out
+go tool cover -html=coverage.out -o coverage.html
+
 # running
 ginkgo
 go test
