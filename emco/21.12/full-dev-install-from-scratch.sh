@@ -545,6 +545,16 @@ tmux
 
 # do the following in separate windows
 EMCO_DIR=~/emco-base
+cd $EMCO_DIR/bin/orchestrator
+killall orchestrator
+./orchestrator >> log.txt 2>&1
+
+EMCO_DIR=~/emco-base
+cd $EMCO_DIR/bin/rsync
+killall rsync
+./rsync >> log.txt 2>&1
+
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/clm
 killall clm
 ./clm >> log.txt 2>&1
@@ -560,19 +570,9 @@ killall ncm
 ./ncm >> log.txt 2>&1
 
 EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/orchestrator
-killall orchestrator
-./orchestrator >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/ovnaction
 killall ovnaction
 ./ovnaction >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/rsync
-killall rsync
-./rsync >> log.txt 2>&1
 
 EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/dtc
@@ -586,6 +586,12 @@ cd $EMCO_DIR/bin/genericactioncontroller
 
 # alternatively launch them all in the background and kill them later
 EMCO_DIR=~/emco-base
+cd $EMCO_DIR/bin/orchestrator
+killall orchestrator
+./orchestrator >> log.txt 2>&1 &
+cd $EMCO_DIR/bin/rsync
+killall rsync
+./rsync >> log.txt 2>&1 &
 cd $EMCO_DIR/bin/clm
 killall clm
 ./clm >> log.txt 2>&1 &
@@ -595,15 +601,9 @@ killall dcm
 cd $EMCO_DIR/bin/ncm
 killall ncm
 ./ncm >> log.txt 2>&1 &
-cd $EMCO_DIR/bin/orchestrator
-killall orchestrator
-./orchestrator >> log.txt 2>&1 &
 cd $EMCO_DIR/bin/ovnaction
 killall ovnaction
 ./ovnaction >> log.txt 2>&1 &
-cd $EMCO_DIR/bin/rsync
-killall rsync
-./rsync >> log.txt 2>&1 &
 cd $EMCO_DIR/bin/dtc
 killall dtc
 ./dtc >> log.txt 2>&1 &
@@ -630,6 +630,8 @@ make
 cd $EMCO_DIR/src/ncm
 make
 cd $EMCO_DIR/src/ovnaction
+make
+cd $EMCO_DIR/src/dtc
 make
 cd $EMCO_DIR/src/monitor
 make
@@ -707,6 +709,8 @@ ssh -fNT -L 9077:$dev_ip:9077 root@$jump_ip -p $jump_port
 ssh -fNT -L 9081:$dev_ip:9081 root@$jump_ip -p $jump_port
 # ovnaction
 ssh -fNT -L 9051:$dev_ip:9051 root@$jump_ip -p $jump_port
+# dtc
+ssh -fNT -L 9018:$dev_ip:9018 root@$jump_ip -p $jump_port
 # ovnaction (grpc)
 ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port #grpc
 # rsync (grpc)
