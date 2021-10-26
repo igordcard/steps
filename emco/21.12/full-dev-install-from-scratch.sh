@@ -15,7 +15,7 @@ MK8S_DIR=~/multicloud-k8s
 
 # recommendation, add the following to .bashrc:
 export MK8S_DIR=~/multicloud-k8s # last commit ID tested: ac7751ec
-export EMCO_DIR=~/EMCO
+export EMCO_DIR=~/emco-base
 
 apt-get install build-essential qemu-kvm libvirt-daemon-system libvirt-dev python3 python-is-python3 -y
 curl -O https://releases.hashicorp.com/vagrant/2.2.14/vagrant_2.2.14_x86_64.deb
@@ -207,7 +207,7 @@ source ~/.profile
 # REF(CONFIGURE-EMCO)
 
 EMCO_REMOTE="$emcogit"
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 git clone $EMCO_REMOTE $EMCO_DIR
 
 # you'll need to setup the EMCO dependencies properly first:
@@ -277,9 +277,10 @@ cat > config.json << EOF
 }
 EOF
 
+# dcm's config.json:
 mkdir -p $EMCO_DIR/bin/dcm
 cd $EMCO_DIR/bin/dcm
-#generate_k8sconfig
+#generate_k8sconfig #optional, for k8s deployment
 cat > config.json << EOF
 {
     "database-ip": "$MONGO_IP",
@@ -337,6 +338,187 @@ cat > config.json << EOF
 }
 EOF
 
+# ===========================
+# set json-schemas for each service
+# REF(JSON-SCHEMAS)
+EMCO_DIR=~/emco-base
+cd $EMCO_DIR/bin/orchestrator
+cp -R $EMCO_DIR/src/orchestrator/json-schemas .
+cd $EMCO_DIR/bin/clm
+cp -R $EMCO_DIR/src/clm/json-schemas .
+cd $EMCO_DIR/bin/rsync
+cp -R $EMCO_DIR/src/rsync/json-schemas .
+cd $EMCO_DIR/bin/ncm
+cp -R $EMCO_DIR/src/ncm/json-schemas .
+cd $EMCO_DIR/bin/dcm
+cp -R $EMCO_DIR/src/dcm/json-schemas .
+cd $EMCO_DIR/bin/ovnaction
+cp -R $EMCO_DIR/src/ovnaction/json-schemas .
+cd $EMCO_DIR/bin/dtc
+cp -R $EMCO_DIR/src/dtc/json-schemas .
+cd $EMCO_DIR/bin/genericactioncontroller
+cp -R $EMCO_DIR/src/genericactioncontroller/json-schemas .
+
+# ===========================
+# set ref-schemas for each service
+# REF(REF-SCHEMAS)
+EMCO_DIR=~/emco-base
+
+# orchestrator
+cd $EMCO_DIR/bin/orchestrator
+mkdir ref-schemas
+cd ref-chemas
+cat > emco-db-ref-schema.yaml << EOF
+    resources:
+      - name: clusterProvider                          # clm
+      - name: cluster                                  # clm
+        parent: clusterProvider
+      - name: clusterLabel                             # clm
+        parent: cluster
+      - name: clusterKv                                # clm
+        parent: cluster
+      - name: logicalCloud                             # dcm
+        parent: project
+      - name: clusterReference                         # dcm
+        parent: logicalCloud
+        references:
+          - name: cluster
+      - name: clusterQuota                             # dcm
+        parent: logicalCloud
+      - name: logicalCloudKv                           # dcm
+        parent: logicalCloud
+      - name: userPermission                           # dcm
+        parent: logicalCloud
+      - name: trafficGroupIntent                       # dtc
+        parent: deploymentIntentGroup
+      - name: inboundServerIntent                      # dtc
+        parent: trafficGroupIntent
+        references:
+          - name: app
+      - name: inboundClientsIntent                     # dtc
+        parent: inboundServerIntent
+        references:
+          - name: app
+      - name: genericK8sIntent                         # gac
+        parent: deploymentIntentGroup
+      - name: genericResource                          # gac
+        parent: genericK8sIntent
+        references:
+          - name: app
+      - name: customization                            # gac
+        parent: genericResource
+        references:
+          - name: cluster
+      - name: providerNetwork                          # ncm
+        parent: cluster
+      - name: network                                  # ncm
+        parent: cluster
+      - name: controllerGroup.controller               # orchestrator
+      - name: project                                  # orchestrator
+      - name: compositeApp.compositeAppVersion         # orchestrator
+        parent: project
+      - name: app                                      # orchestrator
+        parent: compositeAppVersion
+      - name: compositeProfile                         # orchestrator
+        parent: compositeAppVersion
+      - name: appProfile                               # orchestrator
+        parent: compositeProfile
+        references:
+          - name: app
+      - name: deploymentIntentGroup                    # orchestrator
+        parent: compositeAppVersion
+        references:
+          - name: logicalCloud
+          - name: compositeProfile
+      - name: groupIntent                              # orchestrator
+        parent: deploymentIntentGroup
+        references:
+          - name: controller
+            type: map
+            map: intent
+            fixedKv:
+              controllerGroup: orchestrator
+            filterKeys:
+              - genericPlacementIntent
+      - name: genericPlacementIntent                   # orchestrator
+        parent: deploymentIntentGroup
+      - name: genericAppPlacementIntent                # orchestrator
+        parent: genericPlacementIntent
+        references:
+          - name: app
+          - name: cluster
+            type: many
+      - name: netControllerIntent                      # ovnaction
+        parent: deploymentIntentGroup
+      - name: workloadIntent                           # ovnaction
+        parent: netControllerIntent
+        references:
+          - name: app
+      - name: interfaceIntent                          # ovnaction
+        parent: workloadIntent
+      - name: sfcIntent                                # sfc
+        parent: deploymentIntentGroup
+      - name: sfcClientSelector                        # sfc
+        parent: sfcIntent
+      - name: sfcProviderNetwork                       # sfc
+        parent: sfcIntent
+      - name: sfcClientIntent                          # sfcclient
+        parent: netControllerIntent
+        references:
+          - name: sfcIntent
+          - name: app
+            commonKey: compositeAppVersion
+      - name: hpaIntent
+        parent: deploymentIntentGroup
+        references:
+          - name: app
+      - name: hpaConsumer
+        parent: hpaIntent
+      - name: hpaResource
+        parent: hpaConsumer
+EOF
+
+# clm:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/clm
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# rsync:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/rsync
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# ncm:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/ncm
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# dcm:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/dcm
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# ovnaction:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/ovnaction
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# dtc:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/dtc
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
+
+# genericactioncontroller:
+# run orchestrator one above first
+cd $EMCO_DIR/bin/genericactioncontroller
+mkdir ref-schemas
+cp ../orchestrator/ref-schemas/emco-db-ref-schema.yaml ref-schemas/
 
 # ===========================
 # the monitor service also needs to be running on each cluster
@@ -362,48 +544,48 @@ cd $MK8S_DIR/src/monitor/deploy
 tmux
 
 # do the following in separate windows
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/clm
 killall clm
 ./clm >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/dcm
 killall dcm
 ./dcm >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/ncm
 killall ncm
 ./ncm >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/orchestrator
 killall orchestrator
 ./orchestrator >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/ovnaction
 killall ovnaction
 ./ovnaction >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/rsync
 killall rsync
 ./rsync >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/dtc
 killall dtc
 ./dtc >> log.txt 2>&1
 
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 killall genericactioncontroller
 cd $EMCO_DIR/bin/genericactioncontroller
 ./genericactioncontroller >> log.txt 2>&1
 
 # alternatively launch them all in the background and kill them later
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/clm
 killall clm
 ./clm >> log.txt 2>&1 &
@@ -436,7 +618,7 @@ killall genericactioncontroller
 # REF(DEV-EMCO)
 
 # compile all services
-EMCO_DIR=~/EMCO
+EMCO_DIR=~/emco-base
 cd $EMCO_DIR/src/orchestrator
 make
 cd $EMCO_DIR/src/rsync
@@ -450,6 +632,8 @@ make
 cd $EMCO_DIR/src/ovnaction
 make
 cd $EMCO_DIR/src/monitor
+make
+cd $EMCO_DIR/src/genericactioncontroller
 make
 cd $EMCO_DIR/src/tools/emcoctl
 make
@@ -490,10 +674,13 @@ tar -czf prometheus-operator.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collect
 tar -czf prometheus-operator_profile.tar.gz -C $EMCO_DIR/kud/tests/vnfs/comp-app/collection/app2/profile .
 
 # emcoctl testing commands
-$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml apply
-$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml apply
-$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml delete
-$EMCO_DIR/bin/emcoctl/emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml delete
+EMCO_DIR=~/emco-base
+alias emcoctl='$EMCO_DIR/bin/emcoctl/emcoctl'
+emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml apply
+emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml apply
+emcoctl --config emco-cfg.yaml -v values2.yaml -f step1.yaml delete
+emcoctl --config emco-cfg.yaml -v values2.yaml -f step2.yaml delete
+
 
 # see emco-helpers.sh for additional useful commands, including creating an EMCO project
 # see extra-cmds.sh for other debugging commands
@@ -526,7 +713,18 @@ ssh -fNT -L 9032:$dev_ip:9032 root@$jump_ip -p $jump_port #grpc
 ssh -fNT -L 9031:$dev_ip:9031 root@$jump_ip -p $jump_port #grpc
 
 # mongodb
-ssh -fNT -L 27017:172.19.0.2:27017 root@$jump_ip -p $jump_port #mongo
+#ssh -fNT -L 27017:172.19.0.2:27017 root@$jump_ip -p $jump_port #mongo
+ssh -fNT -L 27017:172.18.0.2:27017 root@$jump_ip -p $jump_port #mongo
+
+# etcd
+ssh -fNT -L 2379:172.19.0.2:2379 root@$jump_ip -p $jump_port #etcd
 
 # just a function that forwards all services from above:
 forward_all
+
+# ===========================
+# REF(RUN-EXAMPLES)
+EMCO_DIR=~/emco-base
+cd $EMCO_DIR/src/tools/emcoctl/examples/l1/2clusters
+emcoctl --config ../../emco-cfg.yaml apply -f 1-logical-cloud-prerequisites.yaml -v ../values.yaml
+emcoctl --config ../../emco-cfg.yaml apply -f 2-logical-cloud-instantiate.yaml -v ../values.yaml
