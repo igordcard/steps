@@ -364,8 +364,7 @@ cp -R $EMCO_DIR/src/genericactioncontroller/json-schemas .
 # REF(REF-SCHEMAS)
 EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/orchestrator
-mkdir ref-schemas
-cp  $EMCO_DIR/src/orchestrator/ref-schemas/v1.yaml $EMCO_DIR/bin/orchestrator/ref-schemas/.
+cp -r $EMCO_DIR/src/orchestrator/ref-schemas $EMCO_DIR/bin/orchestrator/ref-schemas/.
 
 # ===========================
 # the monitor service also needs to be running on each cluster
