@@ -7,7 +7,7 @@
 # also updated for Ubuntu 20.04 (20.12 script was for Ubuntu 18.04)
 
 mk8sgit="https://github.com/onap/multicloud-k8s.git"
-emcogit=""
+emcogit="https://gitlab.com/project-emco/core/emco-base.git"
 
 MK8S_REMOTE="$mk8sgit"
 git clone $MK8S_REMOTE
@@ -373,11 +373,9 @@ cp -r $EMCO_DIR/src/orchestrator/ref-schemas $EMCO_DIR/bin/orchestrator/ref-sche
 
 ssh root@$VAGRANT_IP_ADDR1
 
-# MK8S_REMOTE="$mk8sgit"
-MK8S_DIR=~/multicloud-k8s
-# git clone $MK8S_REMOTE $MK8S_DIR
+git clone $emcogit emco-base
+cd emco-base/src/monitor/deploy
 
-cd $MK8S_DIR/src/monitor/deploy
 ./monitor-deploy.sh
 
 # do the same for other clusters
