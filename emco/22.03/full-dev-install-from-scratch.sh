@@ -380,6 +380,14 @@ cd emco-base/src/monitor/deploy
 
 # do the same for other clusters
 
+# To re-deploy monitor and related resources suchs as the ResourceBundleState CRD:
+cd emco-base
+git pull
+cd src/monitor/deploy
+./monitor-cleanup.sh
+sleep 15
+./monitor-deploy.sh
+
 
 # ===========================
 # run the EMCO services in tmux
