@@ -385,6 +385,7 @@ cd emco-base
 git pull
 cd src/monitor/deploy
 ./monitor-cleanup.sh
+kubectl delete crd --all # CRD may be dangling
 sleep 15
 ./monitor-deploy.sh
 
