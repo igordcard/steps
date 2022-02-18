@@ -190,8 +190,8 @@ docker start root_etcd_1
 # install Go
 # REF(INSTALL-GO)
 cd
-export GO_VERSION="1.14.14"
-#export GO_VERSION="1.15.7"
+export GO_VERSION="1.17.7"
+rm -rf /usr/local/go
 curl -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz
 tar -xvf go$GO_VERSION.linux-amd64.tar.gz
 mv go /usr/local
@@ -491,6 +491,18 @@ make
 cd $EMCO_DIR/src/genericactioncontroller
 make
 cd $EMCO_DIR/src/tools/emcoctl
+make
+cd $EMCO_DIR/src/hpa-ac
+make
+cd $EMCO_DIR/src/hpa-plc
+make
+cd $EMCO_DIR/src/its
+make
+cd $EMCO_DIR/src/nps
+make
+cd $EMCO_DIR/src/sfc
+make
+cd $EMCO_DIR/src/sfcclient
 make
 cd $EMCO_DIR
 
