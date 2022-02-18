@@ -1,5 +1,6 @@
 # 20220210+
 # run as root
+# distro tested: ubuntu 20.04
 
 # look up phantom emco resources in emco clusters:
 kubectl get ns && kubectl get csr && kubectl get pods -A && kubectl get resourcebundlestate && kubectl get crd
