@@ -36,8 +36,20 @@ EOF
 systemctl restart docker
 
 ## install monitor on each cluster
-helm install monitor monitor-helm-root-latest.tgz --kubeconfig ~/c01.config
-helm install monitor monitor-helm-root-latest.tgz --kubeconfig ~/c02.config
-#helm install monitor monitor-helm-latest.tgz --kubeconfig ~/c01.config
-#helm install monitor monitor-helm-latest.tgz --kubeconfig ~/c02.config
+helm install monitor monitor-helm-root-latest.tgz --kubeconfig ~/clusters/k23-1.conf
+
+
+# figuring out changes to Makefile for k8s1.23 + go1.17:
+export EMCODOCKERREPO=192.168.121.1:5000/
+export BUILD_CAUSE=DEV_TEST
+export MODS="monitor clm dcm orchestrator rsync dtc tools/emcoctl nps sds its"
+make deploy
+
+
+# updated vagrant cluster access configuration
+export k231=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+sed -i '/k231/d' ~/.bashrc
+echo "export k231=$k231" >> ~/.bashrc
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k231
+ssh vagrant@$k231 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 
