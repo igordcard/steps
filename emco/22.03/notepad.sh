@@ -35,9 +35,6 @@ cat > /etc/docker/daemon.json << EOF
 EOF
 systemctl restart docker
 
-## install monitor on each cluster
-helm install monitor monitor-helm-root-latest.tgz --kubeconfig ~/clusters/k23-1.conf
-
 
 # figuring out changes to Makefile for k8s1.23 + go1.17:
 export EMCODOCKERREPO=192.168.121.1:5000/
@@ -53,3 +50,5 @@ echo "export k231=$k231" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k231
 ssh vagrant@$k231 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
 
+## install monitor on each cluster
+helm install monitor $EMCO_DIR/bin/helm/monitor-helm-root-latest.tgz --kubeconfig ~/clusters/k23-1.conf
