@@ -35,6 +35,14 @@ cat > /etc/docker/daemon.json << EOF
 EOF
 systemctl restart docker
 
+## and if using alvistack's CRI-O-based k8s boxes then change this one instead:
+cat >> /etc/containers/registries.conf << EOF
+
+[[registry]]
+location="$docker_address"
+insecure=true
+EOF
+
 
 # figuring out changes to Makefile for k8s1.23 + go1.17:
 export EMCODOCKERREPO=192.168.121.1:5000/
@@ -55,4 +63,8 @@ helm install monitor $EMCO_DIR/bin/helm/monitor-helm-latest.tgz --kubeconfig ~/c
 
 ## or do it without the package helm charts:
 cd $EMCO_DIR/deployments/helm/monitor
+sed -i 's/172.25.103.10/192.168.121.1/' values.yaml
+#sed -i 's/root-latest/latest/' values.yaml # depends on the situation
 helm install monitor . --kubeconfig ~/clusters/k23-1.conf
+## and to remove:
+helm uninstall monitor --kubeconfig ~/clusters/k23-1.conf
