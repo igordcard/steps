@@ -51,12 +51,34 @@ export MODS="monitor clm dcm orchestrator rsync dtc tools/emcoctl nps sds its"
 make deploy
 
 
-# updated vagrant cluster access configuration
+# updated vagrant cluster access configuration (4 samples for k8s 1.20-1.23)
+vagrant up
 export k231=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
 sed -i '/k231/d' ~/.bashrc
 echo "export k231=$k231" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k231
 ssh vagrant@$k231 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+
+vagrant up
+sed -i '/k221/d' ~/.bashrc
+echo "export k221=$k221" >> ~/.bashrc
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k221
+ssh vagrant@$k221 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+
+vagrant up
+export k211=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+sed -i '/k211/d' ~/.bashrc
+echo "export k211=$k211" >> ~/.bashrc
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k211
+ssh vagrant@$k211 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+
+vagrant up
+export k201=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
+sed -i '/k201/d' ~/.bashrc
+echo "export k201=$k201" >> ~/.bashrc
+ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k201
+ssh vagrant@$k201 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+
 
 ## install monitor on each cluster:
 helm install monitor $EMCO_DIR/bin/helm/monitor-helm-latest.tgz --kubeconfig ~/clusters/k23-1.conf
