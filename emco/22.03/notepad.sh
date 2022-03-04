@@ -58,12 +58,14 @@ sed -i '/k231/d' ~/.bashrc
 echo "export k231=$k231" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k231
 ssh vagrant@$k231 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+scp $k231:~/.kube/config /root/clusters/k23-1.conf
 
 vagrant up
 sed -i '/k221/d' ~/.bashrc
 echo "export k221=$k221" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k221
 ssh vagrant@$k221 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+scp $k221:~/.kube/config /root/clusters/k22-1.conf
 
 vagrant up
 export k211=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
@@ -71,6 +73,7 @@ sed -i '/k211/d' ~/.bashrc
 echo "export k211=$k211" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k211
 ssh vagrant@$k211 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+scp $k211:~/.kube/config /root/clusters/k21-1.conf
 
 vagrant up
 export k201=$(vagrant ssh-config | grep HostName | cut -f 4 -d " ")
@@ -78,6 +81,7 @@ sed -i '/k201/d' ~/.bashrc
 echo "export k201=$k201" >> ~/.bashrc
 ssh-copy-id -f -i ~/.ssh/id_rsa.pub -o "IdentityFile .vagrant/machines/default/libvirt/private_key" -o StrictHostKeyChecking=no vagrant@$k201
 ssh vagrant@$k201 -t "sudo su -c 'mkdir /root/.ssh; cp /home/vagrant/.ssh/authorized_keys /root/.ssh/'"
+scp $k201:~/.kube/config /root/clusters/k20-1.conf
 
 
 ## install monitor on each cluster:
