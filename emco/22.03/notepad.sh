@@ -103,3 +103,7 @@ sed -i 's/172.25.103.10/192.168.121.1/' values.yaml
 helm install monitor . --kubeconfig ~/clusters/k23-1.conf
 ## and to remove:
 helm uninstall monitor --kubeconfig ~/clusters/k23-1.conf
+
+
+# check logs of services running locally
+tail -f log.txt | humanlogx
