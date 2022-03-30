@@ -13,21 +13,21 @@ docker tag emco-gui:latest registry.gitlab.com/project-emco/ui/emco-gui/emco-gui
 docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui:latest
 docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui:$EMCO_VERSION
 
-# emco-gui-dbupdate
-docker build -t emco-gui-dbupdate:latest db_udpate
-docker tag emco-gui-dbupdate:latest emco-gui-dbupdate:$EMCO_VERSION
-docker tag emco-gui-dbupdate:$EMCO_VERSION registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbupdate:$EMCO_VERSION
-docker tag emco-gui-dbupdate:latest registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbupdate:latest
-docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbupdate:latest
-docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbupdate:$EMCO_VERSION
+# emco-gui-dbhook
+docker build -t emco-gui-dbhook:latest db_udpate
+docker tag emco-gui-dbhook:latest emco-gui-dbhook:$EMCO_VERSION
+docker tag emco-gui-dbhook:$EMCO_VERSION registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbhook:$EMCO_VERSION
+docker tag emco-gui-dbhook:latest registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbhook:latest
+docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbhook:latest
+docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-dbhook:$EMCO_VERSION
 
-# emco-gui-authgateway
-docker build -t emco-gui-authgateway:latest authgateway
-docker tag emco-gui-authgateway:latest emco-gui-authgateway:$EMCO_VERSION
-docker tag emco-gui-authgateway:$EMCO_VERSION registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgateway:$EMCO_VERSION
-docker tag emco-gui-authgateway:latest registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgateway:latest
-docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgateway:latest
-docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgateway:$EMCO_VERSION
+# emco-gui-authgw
+docker build -t emco-gui-authgw:latest authgateway
+docker tag emco-gui-authgw:latest emco-gui-authgw:$EMCO_VERSION
+docker tag emco-gui-authgw:$EMCO_VERSION registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgw:$EMCO_VERSION
+docker tag emco-gui-authgw:latest registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgw:latest
+docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgw:latest
+docker push registry.gitlab.com/project-emco/ui/emco-gui/emco-gui-authgw:$EMCO_VERSION
 
 # emco-gui-middleend
 docker build -t emco-gui-middleend:latest guimiddleend
