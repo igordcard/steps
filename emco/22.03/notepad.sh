@@ -106,4 +106,4 @@ helm uninstall monitor --kubeconfig ~/clusters/k23-1.conf
 
 
 # check logs of services running locally
-tail -f log.txt | humanlogx
+tail -f log.txt | humanlog
