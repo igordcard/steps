@@ -396,52 +396,12 @@ sleep 15
 
 tmux
 
-# do the following in separate windows
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/orchestrator
-killall orchestrator
-./orchestrator >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/rsync
-killall rsync
-./rsync >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/clm
-killall clm
-./clm >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/dcm
-killall dcm
-./dcm >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/ncm
-killall ncm
-./ncm >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/ovnaction
-killall ovnaction
-./ovnaction >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-cd $EMCO_DIR/bin/dtc
-killall dtc
-./dtc >> log.txt 2>&1
-
-EMCO_DIR=~/emco-base
-killall genericactioncontroller
-cd $EMCO_DIR/bin/genericactioncontroller
-./genericactioncontroller >> log.txt 2>&1
-
-# alternatively launch them all in the background and kill them later
+# launch them all in the background and kill them later
 EMCO_DIR=~/emco-base
 cd $EMCO_DIR/bin/orchestrator
 killall orchestrator
 ./orchestrator >> log.txt 2>&1 &
+sleep 2 # give it a bit time to make sure orchestrator creates referential integrity db resources before other services can run
 cd $EMCO_DIR/bin/rsync
 killall rsync
 ./rsync >> log.txt 2>&1 &
