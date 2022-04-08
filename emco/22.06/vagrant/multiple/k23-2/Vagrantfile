@@ -1,0 +1,15 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "alvistack/kubernetes-1.23"
+  config.vm.hostname = "k23-2"
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.cpus = 2
+    libvirt.memory = 8192
+    libvirt.machine_virtual_size = 128
+  end
+  config.vm.synced_folder ".", "/vagrant",
+    type: "nfs",
+    nfs_udp: false
+end
