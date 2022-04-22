@@ -2,6 +2,7 @@
 
 docker start root_etcd_1
 docker start deployments_mongo_1
+docker start registry
 
 cd /root/vagrant/k23-1
 vagrant up

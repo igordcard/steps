@@ -1,6 +1,7 @@
 #!/bin/bash
 
 hardreset_emco() {
+        WD=`pwd`
         ns="privileged-lc-ns"
         killall dcm
         killall rsync
@@ -18,4 +19,5 @@ hardreset_emco() {
         ./rsync >> log.txt 2>&1 &
         cd $EMCO_DIR/bin/dcm
         ./dcm >> log.txt 2>&1 &
+        cd $WD
 }
