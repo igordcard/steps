@@ -34,9 +34,23 @@ systemctl daemon-reload
 systemctl restart kubelet.service
 systemctl restart docker.service
 
-####
+# disable swap
+swapoff -a
+vim /etc/fstab
 
+# install k8s
 kubeadm config images pull # --v=5
 kubeadm init # --v=5
+export KUBECONFIG=/etc/kubernetes/admin.conf
+echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /root/.bashrc
+nodename=$(kubectl get node -o jsonpath='{.items[0].metadata.name}')
+kubectl taint node $nodename node-role.kubernetes.io/master:NoSchedule-
+kubectl label --overwrite node $nodename ovn4nfv-k8s-plugin=ovn-control-plane
 
-## at this point not being successful bringing up the cluster - docker seems empty and maybe there's something to be done about the cgroups..
+# install nodus
+git clone https://github.com/akraino-edge-stack/icn-nodus.git
+cd icn-nodus
+kubectl apply -f deploy/ovn-daemonset.yaml
+kubectl apply -f deploy/ovn4nfv-k8s-plugin.yaml
+
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
