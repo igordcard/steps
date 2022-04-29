@@ -40,7 +40,7 @@ vim /etc/fstab
 
 # install k8s
 kubeadm config images pull # --v=5
-kubeadm init --apiserver-advertise-address 10.0.0.3 # --v=5 # replace with correct cp node ip address
+kubeadm init --apiserver-advertise-address 10.0.0.5 --control-plane-endpoint 10.0.0.5 # --v=5 # replace with correct cp node ip address
 export KUBECONFIG=/etc/kubernetes/admin.conf
 echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /root/.bashrc
 nodename=$(kubectl get node -o jsonpath='{.items[0].metadata.name}')
@@ -55,3 +55,10 @@ kubectl apply -f deploy/ovn4nfv-k8s-plugin.yaml
 
 # install helm
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+
+
+# to destroy
+kubeadm reset --force
+rm -rf /etc/cni/net.d
+rm -rf /etc/kubernetes
