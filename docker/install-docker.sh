@@ -27,7 +27,8 @@ cat > /etc/docker/daemon.json <<EOF
   "log-opts": {
     "max-size": "100m"
   },
-  "storage-driver": "overlay2"
+  "storage-driver": "overlay2",
+  "insecure-registries" : ["192.168.121.1:5000"]
 }
 EOF
 
