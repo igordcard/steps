@@ -3,15 +3,15 @@
 # Ubuntu 20.04
 # follow docker/install-docker.sh first
 
-cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+cat <<EOF | tee /etc/modules-load.d/k8s.conf
 br_netfilter
 EOF
 
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+cat <<EOF | tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-sudo sysctl --system
+sysctl --system
 
 apt-get update
 apt-get install -y apt-transport-https ca-certificates curl
@@ -34,7 +34,7 @@ systemctl daemon-reload
 systemctl restart kubelet.service
 systemctl restart docker.service
 
-# disable swap
+# disable swap - this is a necessary step for kubelet!
 swapoff -a
 vim /etc/fstab
 
