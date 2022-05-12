@@ -40,11 +40,14 @@ vim /etc/fstab
 
 # install k8s
 kubeadm config images pull # --v=5
-kubeadm init --apiserver-advertise-address 10.0.0.5 --control-plane-endpoint 10.0.0.5 # --v=5 # replace with correct cp node ip address
+#kubeadm init --apiserver-advertise-address 10.0.0.5 --control-plane-endpoint 10.0.0.5 --pod-network-cidr=10.210.0.0/16 # --v=5 # replace with correct cp node ip address
+kubeadm init --kubernetes-version=1.23.6 --apiserver-advertise-address 10.0.0.5 --control-plane-endpoint 10.0.0.5 # --v=5 # replace with correct cp node ip address
 export KUBECONFIG=/etc/kubernetes/admin.conf
 echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /root/.bashrc
 nodename=$(kubectl get node -o jsonpath='{.items[0].metadata.name}')
 kubectl taint node $nodename node-role.kubernetes.io/master:NoSchedule-
+kubectl taint node $nodename node-role.kubernetes.io/control-plane:NoSchedule-
+kubectl taint node $nodename node.kubernetes.io/not-ready:NoSchedule-
 kubectl label --overwrite node $nodename ovn4nfv-k8s-plugin=ovn-control-plane
 
 # install nodus
@@ -57,8 +60,37 @@ kubectl apply -f deploy/ovn4nfv-k8s-plugin.yaml
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 
+# deploy EMCO (from git):
+git clone https://gitlab.com/project-emco/core/emco-base.git
+cd emco-base
+
+
+# deploy EMCO (from Helm):
+helm repo add emco https://gitlab.com/api/v4/projects/29353813/packages/helm/22.03
+helm repo update
+kubectl create namespace emco
+helm install emco emco/emco  --set global.disableDbAuth=true --namespace emco
+
+# and monitor for  the edge clusters:
 
 # to destroy
+
+helm uninstall emco --namespace emco
+
 kubeadm reset --force
 rm -rf /etc/cni/net.d
 rm -rf /etc/kubernetes
+
+rm -rf /etc/openvswitch
+rm -rf /var/log/openvswitch
+rm -rf /var/log/ovn
+rm -rf /var/run/openvswitch
+rm -rf /var/run/ovn
+
+
+# cleanup of old k8s stuff and make sure containerd is not in the way:
+apt remove -y kubeadm kubectl kubelet kubernetes-cni 
+apt purge -y kube*
+apt-get remove containerd
+apt-get install kubeadm
+
