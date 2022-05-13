@@ -30,6 +30,9 @@ systemctl daemon-reload
 systemctl restart kubelet.service
 systemctl restart docker.service
 
+# if using nodus, stop & disable ufw first
+ufw disable
+
 # disable swap - this is a necessary step for kubelet!
 swapoff -a
 vim /etc/fstab

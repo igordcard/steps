@@ -38,6 +38,9 @@ systemctl restart docker.service
 swapoff -a
 vim /etc/fstab
 
+# if using nodus, stop & disable ufw first
+ufw disable
+
 # install k8s
 kubeadm config images pull # --v=5
 #kubeadm init --apiserver-advertise-address 10.0.0.5 --control-plane-endpoint 10.0.0.5 --pod-network-cidr=10.210.0.0/16 # --v=5 # replace with correct cp node ip address
