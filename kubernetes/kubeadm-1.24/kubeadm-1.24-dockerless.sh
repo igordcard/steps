@@ -48,7 +48,7 @@ crictl ps
 # Start containerd
 systemctl enable --now containerd
 
-# if kubeadm already running by any change, do this too:
+# if kubeadm already running by any chance, do this too:
 vim /etc/sysconfig/kubelet
   # add the following flags to KUBELET_KUBEADM_ARGS variable:
     KUBELET_KUBEADM_ARGS="... --container-runtime=remote --container-runtime-endpoint=/run/containerd/containerd.sock"

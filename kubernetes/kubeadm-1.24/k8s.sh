@@ -106,5 +106,5 @@ rm -rf /var/run/ovn
 apt remove -y kubeadm kubectl kubelet kubernetes-cni 
 apt purge -y kube*
 apt-get remove containerd
-apt-get install kubeadm
+#apt-get install kubeadm
 
