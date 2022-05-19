@@ -86,13 +86,19 @@ git clone https://gitlab.com/project-emco/core/emco-base.git
 cd emco-base
 
 # deploy EMCO (from Helm):
-helm repo add emco https://gitlab.com/api/v4/projects/29353813/packages/helm/22.03
+helm repo add emco https://gitlab.com/api/v4/projects/29353813/packages/helm/stable
 helm repo update
 kubectl create namespace emco
-helm install emco emco/emco --namespace emco
-#helm install emco emco/emco  --set global.disableDbAuth=true --namespace emco
+helm install emco -n emco emco/emco \
+  --set global.db.emcoPassword=SETPASS \
+  --set global.db.rootPassword=SETPASS \
+  --set global.contextdb.rootPassword=SETPASS \
+  --set global.emcoTag=22.03.1
 
 # and monitor for  the edge clusters:
+kubectl create namespace emco
+helm install emco -n emco emco/monitor \
+  --set emcoTag=22.03.1
 
 # to destroy
 
